@@ -274,7 +274,7 @@ impl<T: Ord> BinarySearchTree<T> {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.root.is_none()
+        self.size == 0
     }
 
     pub fn insert(&mut self, value: T) {

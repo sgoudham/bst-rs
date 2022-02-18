@@ -323,24 +323,6 @@ impl<T: Ord> BinarySearchTree<T> {
     }
 }
 
-// impl<T: Ord> Drop for BST<T> {
-//     fn drop(&mut self) {
-//         todo!("I need help with this :sob: :sob:")
-//
-//         // let mut stack = vec![&self.root];
-//         // let mut out: Vec<&LinkNode<T>> = Vec::new();
-//         //
-//         // while !stack.is_empty() {
-//         //     let cur_node = stack.pop().unwrap();
-//         //     out.push(cur_node);
-//         //
-//         //     if let Some(node) = &cur_node.as_ref().unwrap().left {
-//         //         stack.push()
-//         //     }
-//         // }
-//     }
-// }
-
 #[cfg(test)]
 mod bst_test {
     use super::BinarySearchTree;

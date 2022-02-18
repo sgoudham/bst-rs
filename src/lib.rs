@@ -86,20 +86,20 @@ impl<T: Ord> Node<T> {
         }
     }
 
-    fn insert(&mut self, value: T) -> bool {
+    fn insert(&mut self, value: T) -> Result<(), ()> {
         match value.cmp(&self.value) {
-            Ordering::Equal => false,
+            Ordering::Equal => Err(()),
             Ordering::Less => match self.left {
                 None => {
                     self.left = Some(Box::from(Node::new(value)));
-                    true
+                    Ok(())
                 }
                 Some(ref mut node) => node.insert(value),
             },
             Ordering::Greater => match self.right {
                 None => {
                     self.right = Some(Box::from(Node::new(value)));
-                    true
+                    Ok(())
                 }
                 Some(ref mut node) => node.insert(value),
             },
@@ -148,7 +148,7 @@ impl<T: Ord> Node<T> {
         }
     }
 
-    fn remove(root: &mut HeapNode<T>, value: &T) -> bool {
+    fn remove(root: &mut HeapNode<T>, value: &T) -> Result<(), ()> {
         if let Some(ref mut node) = root {
             return match value.cmp(&node.value) {
                 Ordering::Less => Node::remove(&mut node.left, value),
@@ -161,12 +161,12 @@ impl<T: Ord> Node<T> {
                         (Some(_), Some(_)) => node.value = Node::extract_min(&mut node.right),
                     }
 
-                    true
+                    Ok(())
                 }
             };
         }
 
-        false
+        Err(())
     }
 
     // TODO -> Implement min(), max(), height(), is_valid(), invert() functions
@@ -260,7 +260,7 @@ impl<T: Ord> BinarySearchTree<T> {
                 self.size += 1;
             }
             Some(ref mut node) => {
-                if node.insert(value) {
+                if node.insert(value).is_ok() {
                     self.size += 1;
                 }
             }
@@ -275,7 +275,7 @@ impl<T: Ord> BinarySearchTree<T> {
     }
 
     pub fn remove(&mut self, value: &T) {
-        if Node::remove(&mut self.root, value) {
+        if Node::remove(&mut self.root, value).is_ok() {
             self.size -= 1;
         }
     }

@@ -158,7 +158,9 @@ impl<T: Ord> Node<T> {
                         (None, None) => *root = None,
                         (Some(_), None) => *root = node.left.take(),
                         (None, Some(_)) => *root = node.right.take(),
-                        (Some(_), Some(_)) => node.value = Node::extract_min(&mut node.right),
+                        (Some(_), Some(_)) => {
+                            node.value = Node::remove_min(&mut node.right).unwrap()
+                        }
                     }
 
                     Ok(())
@@ -183,13 +185,23 @@ impl<T: Ord> Node<T> {
         }
     }
 
-    fn extract_min(root: &mut HeapNode<T>) -> T {
+    fn remove_min(root: &mut HeapNode<T>) -> Option<T> {
         if root.as_ref().unwrap().left.is_some() {
-            Node::extract_min(&mut root.as_mut().unwrap().left)
+            Node::remove_min(&mut root.as_mut().unwrap().left)
         } else {
             let node = root.take().unwrap();
             *root = node.right;
-            node.value
+            Some(node.value)
+        }
+    }
+
+    fn remove_max(root: &mut HeapNode<T>) -> Option<T> {
+        if root.as_ref().unwrap().right.is_some() {
+            Node::remove_max(&mut root.as_mut().unwrap().right)
+        } else {
+            let node = root.take().unwrap();
+            *root = node.left;
+            Some(node.value)
         }
     }
 
@@ -318,6 +330,32 @@ impl<T: Ord> BinarySearchTree<T> {
             None => None,
             Some(ref node) => node.max(),
         }
+    }
+
+    pub fn remove_min(&mut self) -> Option<T> {
+        let removed_min = match self.root {
+            None => None,
+            Some(_) => Node::remove_min(&mut self.root),
+        };
+
+        if removed_min.is_some() {
+            self.size -= 1;
+        }
+
+        removed_min
+    }
+
+    pub fn remove_max(&mut self) -> Option<T> {
+        let removed_max = match self.root {
+            None => None,
+            Some(_) => Node::remove_max(&mut self.root),
+        };
+
+        if removed_max.is_some() {
+            self.size -= 1;
+        }
+
+        removed_max
     }
 
     pub fn pre_order(&self) -> Vec<&T> {
@@ -578,6 +616,44 @@ mod bst_test {
         bst.insert(15);
 
         assert_eq!(bst.max(), Some(&15));
+    }
+
+    #[test]
+    fn remove_min_from_bst() {
+        let mut bst = BinarySearchTree::empty();
+        assert_eq!(bst.remove_min(), None);
+
+        bst.insert(5);
+        assert_eq!(bst.remove_min(), Some(5));
+        assert_eq!(bst.size(), 0);
+
+        bst.insert(3);
+        bst.insert(1);
+        bst.insert(2);
+        bst.insert(15);
+
+        assert_eq!(bst.remove_min(), Some(1));
+        assert!(bst.contains(&2));
+        assert_eq!(bst.size(), 3);
+    }
+
+    #[test]
+    fn remove_max_from_bst() {
+        let mut bst = BinarySearchTree::empty();
+        assert_eq!(bst.remove_max(), None);
+
+        bst.insert(5);
+        assert_eq!(bst.remove_max(), Some(5));
+        assert_eq!(bst.size(), 0);
+
+        bst.insert(3);
+        bst.insert(1);
+        bst.insert(15);
+        bst.insert(10);
+
+        assert_eq!(bst.remove_max(), Some(15));
+        assert!(bst.contains(&10));
+        assert_eq!(bst.size(), 3);
     }
 
     #[test]

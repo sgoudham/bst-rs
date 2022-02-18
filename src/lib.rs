@@ -169,7 +169,19 @@ impl<T: Ord> Node<T> {
         Err(())
     }
 
-    // TODO -> Implement min(), max(), height(), is_valid(), invert() functions
+    fn min(&self) -> Option<&T> {
+        match &self.left {
+            None => Some(&self.value),
+            Some(node) => node.min(),
+        }
+    }
+
+    fn max(&self) -> Option<&T> {
+        match &self.right {
+            None => Some(&self.value),
+            Some(node) => node.max(),
+        }
+    }
 
     fn extract_min(root: &mut HeapNode<T>) -> T {
         if root.as_ref().unwrap().left.is_some() {
@@ -291,6 +303,20 @@ impl<T: Ord> BinarySearchTree<T> {
         match self.root {
             None => None,
             Some(ref mut node) => node.retrieve_as_mut(value),
+        }
+    }
+
+    pub fn min(&self) -> Option<&T> {
+        match self.root {
+            None => None,
+            Some(ref node) => node.min(),
+        }
+    }
+
+    pub fn max(&self) -> Option<&T> {
+        match self.root {
+            None => None,
+            Some(ref node) => node.max(),
         }
     }
 
@@ -526,6 +552,32 @@ mod bst_test {
         *_retrieved_value_as_mut = 2;
 
         assert_eq!(actual_bst, expected_bst);
+    }
+
+    #[test]
+    fn get_min_from_bst() {
+        let mut bst = BinarySearchTree::empty();
+        assert_eq!(bst.min(), None);
+
+        bst.insert(5);
+        bst.insert(3);
+        bst.insert(1);
+        bst.insert(15);
+
+        assert_eq!(bst.min(), Some(&1));
+    }
+
+    #[test]
+    fn get_max_from_bst() {
+        let mut bst = BinarySearchTree::empty();
+        assert_eq!(bst.max(), None);
+
+        bst.insert(5);
+        bst.insert(12);
+        bst.insert(1);
+        bst.insert(15);
+
+        assert_eq!(bst.max(), Some(&15));
     }
 
     #[test]

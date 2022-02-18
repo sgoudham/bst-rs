@@ -19,7 +19,7 @@ type HeapNode<T> = Option<Box<Node<T>>>;
 
 impl<T: Ord> PartialEq for BinarySearchTree<T> {
     fn eq(&self, other: &Self) -> bool {
-        self.in_order() == other.in_order()
+        self.in_order_vec() == other.in_order_vec()
     }
 }
 
@@ -73,7 +73,7 @@ impl<T: Ord + Clone> Clone for BinarySearchTree<T> {
 
 impl<T: Ord + Debug> Display for BinarySearchTree<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.in_order())
+        write!(f, "{:?}", self.in_order_vec())
     }
 }
 
@@ -358,19 +358,19 @@ impl<T: Ord> BinarySearchTree<T> {
         removed_max
     }
 
-    pub fn pre_order(&self) -> Vec<&T> {
+    pub fn pre_order_vec(&self) -> Vec<&T> {
         let mut elements: Vec<&T> = Vec::new();
         Node::pre_order_vec(&self.root, &mut elements);
         elements
     }
 
-    pub fn in_order(&self) -> Vec<&T> {
+    pub fn in_order_vec(&self) -> Vec<&T> {
         let mut elements: Vec<&T> = Vec::new();
         Node::in_order_vec(&self.root, &mut elements);
         elements
     }
 
-    pub fn post_order(&self) -> Vec<&T> {
+    pub fn post_order_vec(&self) -> Vec<&T> {
         let mut elements: Vec<&T> = Vec::new();
         Node::post_order_vec(&self.root, &mut elements);
         elements
@@ -808,7 +808,7 @@ mod bst_test {
     }
 
     #[test]
-    fn pre_order() {
+    fn get_pre_order_vec() {
         let mut bst = BinarySearchTree::empty();
         bst.insert(3);
         bst.insert(4);
@@ -816,11 +816,11 @@ mod bst_test {
         bst.insert(1);
         bst.insert(2);
 
-        assert_eq!(bst.pre_order(), vec![&3, &1, &2, &4, &5]);
+        assert_eq!(bst.pre_order_vec(), vec![&3, &1, &2, &4, &5]);
     }
 
     #[test]
-    fn in_order() {
+    fn get_in_order_vec() {
         let mut bst = BinarySearchTree::empty();
         bst.insert(3);
         bst.insert(4);
@@ -828,11 +828,11 @@ mod bst_test {
         bst.insert(1);
         bst.insert(2);
 
-        assert_eq!(bst.in_order(), vec![&1, &2, &3, &4, &5]);
+        assert_eq!(bst.in_order_vec(), vec![&1, &2, &3, &4, &5]);
     }
 
     #[test]
-    fn post_order() {
+    fn get_post_order_vec() {
         let mut bst = BinarySearchTree::empty();
         bst.insert(3);
         bst.insert(4);
@@ -840,7 +840,7 @@ mod bst_test {
         bst.insert(1);
         bst.insert(2);
 
-        assert_eq!(bst.post_order(), vec![&2, &1, &5, &4, &3]);
+        assert_eq!(bst.post_order_vec(), vec![&2, &1, &5, &4, &3]);
     }
 
     #[test]

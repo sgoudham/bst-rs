@@ -19,7 +19,7 @@ type HeapNode<T> = Option<Box<Node<T>>>;
 
 impl<T: Ord> PartialEq for BinarySearchTree<T> {
     fn eq(&self, other: &Self) -> bool {
-        self.in_order_vec() == other.in_order_vec()
+        self.sorted_vec() == other.sorted_vec()
     }
 }
 
@@ -73,7 +73,7 @@ impl<T: Ord + Clone> Clone for BinarySearchTree<T> {
 
 impl<T: Ord + Debug> Display for BinarySearchTree<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.in_order_vec())
+        write!(f, "{:?}", self.sorted_vec())
     }
 }
 
@@ -356,6 +356,18 @@ impl<T: Ord> BinarySearchTree<T> {
         }
 
         removed_max
+    }
+
+    pub fn sorted_vec(&self) -> Vec<&T> {
+        let mut elements: Vec<&T> = Vec::new();
+        Node::in_order_vec(&self.root, &mut elements);
+        elements
+    }
+
+    pub fn into_sorted_vec(self) -> Vec<T> {
+        let mut elements = Vec::new();
+        Node::consume_in_order_vec(self.root, &mut elements);
+        elements
     }
 
     pub fn pre_order_vec(&self) -> Vec<&T> {
@@ -657,7 +669,7 @@ mod bst_test {
     }
 
     #[test]
-    fn pre_order_traversal() {
+    fn pre_order_iter() {
         let mut bst = BinarySearchTree::empty();
         bst.insert(3);
         bst.insert(4);
@@ -688,7 +700,7 @@ mod bst_test {
     }
 
     #[test]
-    fn in_order_traversal() {
+    fn in_order_iter() {
         let mut bst = BinarySearchTree::empty();
         bst.insert(3);
         bst.insert(4);
@@ -719,7 +731,7 @@ mod bst_test {
     }
 
     #[test]
-    fn post_order_traversal() {
+    fn post_order_iter() {
         let mut bst = BinarySearchTree::empty();
         bst.insert(3);
         bst.insert(4);
@@ -751,7 +763,7 @@ mod bst_test {
     }
 
     #[test]
-    fn into_pre_order_traversal() {
+    fn into_pre_order_iter() {
         let mut bst = BinarySearchTree::empty();
         bst.insert(3);
         bst.insert(4);
@@ -770,7 +782,7 @@ mod bst_test {
     }
 
     #[test]
-    fn into_in_order_traversal() {
+    fn into_in_order_iter() {
         let mut bst = BinarySearchTree::empty();
         bst.insert(3);
         bst.insert(4);
@@ -789,7 +801,7 @@ mod bst_test {
     }
 
     #[test]
-    fn into_post_order_traversal() {
+    fn into_post_order_iter() {
         let mut bst = BinarySearchTree::empty();
         bst.insert(3);
         bst.insert(4);
@@ -805,6 +817,30 @@ mod bst_test {
         assert_eq!(post_order_traversal.next(), Some(4));
         assert_eq!(post_order_traversal.next(), Some(3));
         assert_eq!(post_order_traversal.next(), None);
+    }
+
+    #[test]
+    fn get_sorted_vec() {
+        let mut bst = BinarySearchTree::empty();
+        bst.insert(3);
+        bst.insert(4);
+        bst.insert(5);
+        bst.insert(1);
+        bst.insert(2);
+
+        assert_eq!(bst.sorted_vec(), vec![&1, &2, &3, &4, &5]);
+    }
+
+    #[test]
+    fn bst_into_sorted_vec() {
+        let mut bst = BinarySearchTree::empty();
+        bst.insert(3);
+        bst.insert(4);
+        bst.insert(5);
+        bst.insert(1);
+        bst.insert(2);
+
+        assert_eq!(bst.into_sorted_vec(), vec![1, 2, 3, 4, 5]);
     }
 
     #[test]

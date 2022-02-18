@@ -1,22 +1,36 @@
 use std::cmp::Ordering;
+use std::fmt::{Display, Formatter};
 use std::vec::IntoIter;
 
-#[derive(Debug)]
+#[derive(Debug, Eq)]
 pub struct BinarySearchTree<T: Ord> {
-    root: Child<T>,
+    root: HeapNode<T>,
+    size: usize,
 }
 
-type Child<T> = Option<Box<Node<T>>>;
-
-#[derive(Debug)]
+#[derive(Debug, Eq)]
 struct Node<T: Ord> {
     value: T,
-    left: Child<T>,
-    right: Child<T>,
+    left: HeapNode<T>,
+    right: HeapNode<T>,
+}
+
+type HeapNode<T> = Option<Box<Node<T>>>;
+
+impl<T: Ord + Display> Display for Node<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value)
+    }
+}
+
+impl<T: Ord> PartialEq for Node<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
 }
 
 impl<T: Ord> Node<T> {
-    fn new(value: T) -> Self {
+    fn new(value: T) -> Node<T> {
         Node {
             value,
             left: None,
@@ -24,21 +38,27 @@ impl<T: Ord> Node<T> {
         }
     }
 
-    fn insert(&mut self, value: T) {
+    fn insert(&mut self, value: T) -> bool {
         match value.cmp(&self.value) {
-            Ordering::Equal => {}
+            Ordering::Equal => false,
             Ordering::Less => match self.left {
-                None => self.left = Some(Box::from(Node::new(value))),
+                None => {
+                    self.left = Some(Box::from(Node::new(value)));
+                    true
+                }
                 Some(ref mut node) => node.insert(value),
             },
             Ordering::Greater => match self.right {
-                None => self.right = Some(Box::from(Node::new(value))),
+                None => {
+                    self.right = Some(Box::from(Node::new(value)));
+                    true
+                }
                 Some(ref mut node) => node.insert(value),
             },
         }
     }
 
-    fn contains(&self, value: T) -> bool {
+    fn contains(&self, value: &T) -> bool {
         match value.cmp(&self.value) {
             Ordering::Equal => true,
             Ordering::Less => match self.left {
@@ -80,147 +100,127 @@ impl<T: Ord> Node<T> {
         }
     }
 
-    // https://users.rust-lang.org/t/binary-search-tree-node-removal-without-unsafe-code/56078
-    fn remove(mut root: &mut Child<T>, value: T) {
-        while let Some(ref mut node) = root {
-            match node.value.cmp(&value) {
-                Ordering::Less => root = &mut root.as_mut().unwrap().right,
-                Ordering::Greater => root = &mut root.as_mut().unwrap().left,
-                Ordering::Equal => match (node.left.as_mut(), node.right.as_mut()) {
-                    (None, None) => *root = None,
-                    (Some(_), None) => *root = node.left.take(),
-                    (None, Some(_)) => *root = node.right.take(),
-                    (Some(_), Some(_)) => {
-                        root.as_mut().unwrap().value = Self::extract_min(&mut node.right).unwrap()
+    fn remove(root: &mut HeapNode<T>, value: &T) -> bool {
+        if let Some(ref mut node) = root {
+            return match value.cmp(&node.value) {
+                Ordering::Less => Node::remove(&mut node.left, value),
+                Ordering::Greater => Node::remove(&mut node.right, value),
+                Ordering::Equal => {
+                    match (&node.left, &node.right) {
+                        (None, None) => *root = None,
+                        (Some(_), None) => *root = node.left.take(),
+                        (None, Some(_)) => *root = node.right.take(),
+                        (Some(_), Some(_)) => node.value = Node::extract_min(&mut node.right),
                     }
-                },
-            }
+
+                    true
+                }
+            };
+        }
+
+        false
+    }
+
+    fn extract_min(root: &mut HeapNode<T>) -> T {
+        if root.as_ref().unwrap().left.is_some() {
+            Node::extract_min(&mut root.as_mut().unwrap().left)
+        } else {
+            let node = root.take().unwrap();
+            *root = node.right;
+            node.value
         }
     }
 
-    // https://users.rust-lang.org/t/binary-search-tree-node-removal-without-unsafe-code/56078
-    fn extract_min(node: &mut Child<T>) -> Option<T> {
-        let mut value = None;
-
-        if node.is_some() {
-            let mut current = node;
-
-            while current.as_ref().unwrap().left.is_some() {
-                current = &mut current.as_mut().unwrap().left;
-            }
-
-            let node = current.take().unwrap();
-            value = Some(node.value);
-            *current = node.right;
-        }
-
-        value
-    }
-
-    fn pre_order_traversal<'a>(node: &'a Child<T>, elements: &mut Vec<&'a T>) {
+    fn pre_order_traversal<'a>(node: &'a HeapNode<T>, elements: &mut Vec<&'a T>) {
         if let Some(ref node) = node {
             elements.push(&node.value);
-            Self::pre_order_traversal(&node.left, elements);
-            Self::pre_order_traversal(&node.right, elements);
+            Node::pre_order_traversal(&node.left, elements);
+            Node::pre_order_traversal(&node.right, elements);
         }
     }
 
-    fn in_order_traversal<'a>(node: &'a Child<T>, elements: &mut Vec<&'a T>) {
+    fn in_order_traversal<'a>(node: &'a HeapNode<T>, elements: &mut Vec<&'a T>) {
         if let Some(ref node) = node {
-            Self::in_order_traversal(&node.left, elements);
+            Node::in_order_traversal(&node.left, elements);
             elements.push(&node.value);
-            Self::in_order_traversal(&node.right, elements);
+            Node::in_order_traversal(&node.right, elements);
         }
     }
 
-    fn post_order_traversal<'a>(node: &'a Child<T>, elements: &mut Vec<&'a T>) {
+    fn post_order_traversal<'a>(node: &'a HeapNode<T>, elements: &mut Vec<&'a T>) {
         if let Some(ref node) = node {
-            Self::post_order_traversal(&node.left, elements);
-            Self::post_order_traversal(&node.right, elements);
+            Node::post_order_traversal(&node.left, elements);
+            Node::post_order_traversal(&node.right, elements);
             elements.push(&node.value);
         }
     }
 
-    fn into_pre_order_traversal(node: Child<T>, elements: &mut Vec<T>) {
+    fn into_pre_order_traversal(node: HeapNode<T>, elements: &mut Vec<T>) {
         if let Some(node) = node {
             elements.push(node.value);
-            Self::into_pre_order_traversal(node.left, elements);
-            Self::into_pre_order_traversal(node.right, elements);
+            Node::into_pre_order_traversal(node.left, elements);
+            Node::into_pre_order_traversal(node.right, elements);
         }
     }
 
-    fn into_in_order_traversal(node: Child<T>, elements: &mut Vec<T>) {
+    fn into_in_order_traversal(node: HeapNode<T>, elements: &mut Vec<T>) {
         if let Some(node) = node {
-            Self::into_in_order_traversal(node.left, elements);
+            Node::into_in_order_traversal(node.left, elements);
             elements.push(node.value);
-            Self::into_in_order_traversal(node.right, elements);
+            Node::into_in_order_traversal(node.right, elements);
         }
     }
 
-    fn into_post_order_traversal(node: Child<T>, elements: &mut Vec<T>) {
+    fn into_post_order_traversal(node: HeapNode<T>, elements: &mut Vec<T>) {
         if let Some(node) = node {
-            Self::into_post_order_traversal(node.left, elements);
-            Self::into_post_order_traversal(node.right, elements);
+            Node::into_post_order_traversal(node.left, elements);
+            Node::into_post_order_traversal(node.right, elements);
             elements.push(node.value);
         }
     }
 }
 
-impl<T: Ord + Copy> Node<T> {
-    fn pre_order_traversal_copy(node: &Child<T>, elements: &mut Vec<T>) {
-        if let Some(ref node) = node {
-            elements.push(node.value);
-            Self::pre_order_traversal_copy(&node.left, elements);
-            Self::pre_order_traversal_copy(&node.right, elements);
-        }
-    }
+impl<T: Ord + Display> Display for BinarySearchTree<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[")?;
 
-    fn in_order_traversal_copy(node: &Child<T>, elements: &mut Vec<T>) {
-        if let Some(ref node) = node {
-            Self::in_order_traversal_copy(&node.left, elements);
-            elements.push(node.value);
-            Self::in_order_traversal_copy(&node.right, elements);
+        let vec = self.in_order_iter();
+        let len = vec.len();
+        for (index, elem) in vec.enumerate() {
+            if index == len - 1 {
+                write!(f, "{}", elem)?;
+            } else {
+                write!(f, "{}, ", elem)?;
+            }
         }
-    }
 
-    fn post_order_traversal_copy(node: &Child<T>, elements: &mut Vec<T>) {
-        if let Some(ref node) = node {
-            Self::post_order_traversal_copy(&node.left, elements);
-            Self::post_order_traversal_copy(&node.right, elements);
-            elements.push(node.value);
-        }
+        write!(f, "]")
     }
 }
 
-impl<T: Ord + Copy> BinarySearchTree<T> {
-    pub fn pre_order(&self) -> Vec<T> {
-        let mut elements: Vec<T> = Vec::new();
-        Node::pre_order_traversal_copy(&self.root, &mut elements);
-        elements
-    }
-
-    pub fn in_order(&self) -> Vec<T> {
-        let mut elements: Vec<T> = Vec::new();
-        Node::in_order_traversal_copy(&self.root, &mut elements);
-        elements
-    }
-
-    pub fn post_order(&self) -> Vec<T> {
-        let mut elements: Vec<T> = Vec::new();
-        Node::post_order_traversal_copy(&self.root, &mut elements);
-        elements
+impl<T: Ord> PartialEq for BinarySearchTree<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.in_order() == other.in_order()
     }
 }
 
 impl<T: Ord> BinarySearchTree<T> {
-    pub fn empty() -> Self {
-        Self { root: None }
+    pub fn empty() -> BinarySearchTree<T> {
+        BinarySearchTree {
+            root: None,
+            size: 0,
+        }
     }
 
-    pub fn new(value: T) -> Self {
-        Self {
+    pub fn new(value: T) -> BinarySearchTree<T> {
+        BinarySearchTree {
             root: Some(Box::from(Node::new(value))),
+            size: 1,
         }
+    }
+
+    pub fn size(&self) -> usize {
+        self.size
     }
 
     pub fn is_empty(&self) -> bool {
@@ -229,20 +229,29 @@ impl<T: Ord> BinarySearchTree<T> {
 
     pub fn insert(&mut self, value: T) {
         match self.root {
-            None => self.root = Some(Box::from(Node::new(value))),
-            Some(ref mut node) => node.insert(value),
+            None => {
+                self.root = Some(Box::from(Node::new(value)));
+                self.size += 1;
+            }
+            Some(ref mut node) => {
+                if node.insert(value) {
+                    self.size += 1;
+                }
+            }
         }
     }
 
-    pub fn contains(&self, value: T) -> bool {
+    pub fn contains(&self, value: &T) -> bool {
         match self.root {
             None => false,
             Some(ref node) => node.contains(value),
         }
     }
 
-    pub fn remove(&mut self, value: T) {
-        Node::remove(&mut self.root, value);
+    pub fn remove(&mut self, value: &T) {
+        if Node::remove(&mut self.root, value) {
+            self.size -= 1;
+        }
     }
 
     pub fn retrieve(&self, value: T) -> Option<&T> {
@@ -257,6 +266,24 @@ impl<T: Ord> BinarySearchTree<T> {
             None => None,
             Some(ref mut node) => node.retrieve_as_mut(value),
         }
+    }
+
+    pub fn pre_order(&self) -> Vec<&T> {
+        let mut elements: Vec<&T> = Vec::new();
+        Node::pre_order_traversal(&self.root, &mut elements);
+        elements
+    }
+
+    pub fn in_order(&self) -> Vec<&T> {
+        let mut elements: Vec<&T> = Vec::new();
+        Node::in_order_traversal(&self.root, &mut elements);
+        elements
+    }
+
+    pub fn post_order(&self) -> Vec<&T> {
+        let mut elements: Vec<&T> = Vec::new();
+        Node::post_order_traversal(&self.root, &mut elements);
+        elements
     }
 
     pub fn pre_order_iter(&self) -> IntoIter<&T> {
@@ -327,10 +354,7 @@ mod bst_test {
         bst.insert(1);
         bst.insert(2);
 
-        assert_eq!(bst.retrieve(-1), Some(&-1));
-        assert_eq!(bst.retrieve(0), Some(&0));
-        assert_eq!(bst.retrieve(1), Some(&1));
-        assert_eq!(bst.retrieve(2), Some(&2));
+        assert_eq!(bst.size(), 4);
     }
 
     #[test]
@@ -349,9 +373,9 @@ mod bst_test {
         bst.insert(1);
         bst.insert(5);
 
-        assert!(!bst.contains(10));
-        assert!(bst.contains(1));
-        assert!(bst.contains(5));
+        assert!(!bst.contains(&10));
+        assert!(bst.contains(&1));
+        assert!(bst.contains(&5));
     }
 
     #[test]
@@ -359,83 +383,112 @@ mod bst_test {
         let mut bst = BinarySearchTree::empty();
         bst.insert(0);
 
-        bst.remove(0);
+        assert!(!bst.is_empty());
+        assert_eq!(bst.size(), 1);
 
-        assert!(bst.is_empty())
+        bst.remove(&0);
+
+        assert!(bst.is_empty());
+        assert_eq!(bst.size(), 0)
     }
 
     #[test]
     fn remove_leaf_node() {
-        let mut bst = BinarySearchTree::empty();
-        bst.insert(5);
-        bst.insert(4);
-        bst.insert(6);
-        bst.insert(7);
+        let mut expected_bst = BinarySearchTree::empty();
+        expected_bst.insert(5);
+        expected_bst.insert(4);
+        expected_bst.insert(6);
+        let mut actual_bst = BinarySearchTree::empty();
+        actual_bst.insert(5);
+        actual_bst.insert(4);
+        actual_bst.insert(6);
+        actual_bst.insert(7);
 
-        bst.remove(7);
+        actual_bst.remove(&7);
 
-        assert!(!bst.contains(7));
-        assert_eq!(bst.in_order(), vec![4, 5, 6])
+        assert_eq!(actual_bst.size(), 3);
+        assert_eq!(actual_bst, expected_bst);
     }
 
     #[test]
     fn remove_single_right_node_with_children() {
-        let mut bst = BinarySearchTree::empty();
-        bst.insert(5);
-        bst.insert(4);
-        bst.insert(6);
-        bst.insert(7);
-        bst.insert(8);
+        let mut expected_bst = BinarySearchTree::empty();
+        expected_bst.insert(5);
+        expected_bst.insert(4);
+        expected_bst.insert(7);
+        expected_bst.insert(8);
+        let mut actual_bst = BinarySearchTree::empty();
+        actual_bst.insert(5);
+        actual_bst.insert(4);
+        actual_bst.insert(6);
+        actual_bst.insert(7);
+        actual_bst.insert(8);
 
-        bst.remove(6);
+        actual_bst.remove(&6);
 
-        assert!(!bst.contains(6));
-        assert_eq!(bst.in_order(), vec![4, 5, 7, 8])
+        assert_eq!(actual_bst.size(), 4);
+        assert_eq!(actual_bst, expected_bst);
     }
 
     #[test]
     fn remove_single_left_node_with_children() {
-        let mut bst = BinarySearchTree::empty();
-        bst.insert(5);
-        bst.insert(4);
-        bst.insert(6);
-        bst.insert(3);
-        bst.insert(2);
+        let mut expected_bst = BinarySearchTree::empty();
+        expected_bst.insert(5);
+        expected_bst.insert(3);
+        expected_bst.insert(2);
+        expected_bst.insert(6);
+        let mut actual_bst = BinarySearchTree::empty();
+        actual_bst.insert(5);
+        actual_bst.insert(4);
+        actual_bst.insert(6);
+        actual_bst.insert(3);
+        actual_bst.insert(2);
 
-        bst.remove(4);
+        actual_bst.remove(&4);
 
-        assert!(!bst.contains(4));
-        assert_eq!(bst.in_order(), vec![2, 3, 5, 6])
+        assert_eq!(actual_bst.size(), 4);
+        assert_eq!(actual_bst, expected_bst);
     }
 
     #[test]
     fn remove_node_with_two_children() {
-        let mut bst = BinarySearchTree::empty();
-        bst.insert(10);
-        bst.insert(5);
-        bst.insert(8);
-        bst.insert(3);
-        bst.insert(15);
+        let mut expected_bst = BinarySearchTree::empty();
+        expected_bst.insert(10);
+        expected_bst.insert(3);
+        expected_bst.insert(8);
+        expected_bst.insert(15);
+        let mut actual_bst = BinarySearchTree::empty();
+        actual_bst.insert(10);
+        actual_bst.insert(5);
+        actual_bst.insert(8);
+        actual_bst.insert(3);
+        actual_bst.insert(15);
 
-        bst.remove(5);
+        actual_bst.remove(&5);
 
-        assert!(!bst.contains(5));
-        assert_eq!(bst.in_order(), vec![3, 8, 10, 15])
+        assert_eq!(actual_bst, expected_bst);
     }
 
     #[test]
     fn does_not_fail_when_removing_non_existing_element() {
-        let mut bst = BinarySearchTree::empty();
-        bst.insert(10);
-        bst.insert(5);
-        bst.insert(8);
-        bst.insert(3);
-        bst.insert(15);
+        let mut expected_bst = BinarySearchTree::empty();
+        expected_bst.insert(10);
+        expected_bst.insert(5);
+        expected_bst.insert(8);
+        expected_bst.insert(3);
+        expected_bst.insert(15);
 
-        bst.remove(20);
+        let mut actual_bst = BinarySearchTree::empty();
+        actual_bst.insert(10);
+        actual_bst.insert(5);
+        actual_bst.insert(8);
+        actual_bst.insert(3);
+        actual_bst.insert(15);
 
-        assert!(!bst.contains(20));
-        assert_eq!(bst.in_order(), vec![3, 5, 8, 10, 15])
+        actual_bst.remove(&20);
+
+        assert_eq!(actual_bst.size(), 5);
+        assert_eq!(actual_bst, expected_bst);
     }
 
     #[test]
@@ -453,16 +506,18 @@ mod bst_test {
 
     #[test]
     fn retrieve_element_as_mut_and_modify_bst() {
-        let mut bst = BinarySearchTree::empty();
-        bst.insert(10);
-        bst.insert(5);
+        let mut expected_bst = BinarySearchTree::empty();
+        expected_bst.insert(10);
+        expected_bst.insert(2);
 
-        let _retrieved_value_as_mut: &mut i32 = bst.retrieve_as_mut(5).unwrap();
+        let mut actual_bst = BinarySearchTree::empty();
+        actual_bst.insert(10);
+        actual_bst.insert(5);
+
+        let _retrieved_value_as_mut: &mut i32 = actual_bst.retrieve_as_mut(5).unwrap();
         *_retrieved_value_as_mut = 2;
 
-        assert!(bst.contains(10));
-        assert!(bst.contains(2));
-        assert!(!bst.contains(5));
+        assert_eq!(actual_bst, expected_bst);
     }
 
     #[test]
@@ -617,7 +672,7 @@ mod bst_test {
     }
 
     #[test]
-    fn pre_order_traversal_copy() {
+    fn pre_order() {
         let mut bst = BinarySearchTree::empty();
         bst.insert(3);
         bst.insert(4);
@@ -625,11 +680,11 @@ mod bst_test {
         bst.insert(1);
         bst.insert(2);
 
-        assert_eq!(bst.pre_order(), vec![3, 1, 2, 4, 5]);
+        assert_eq!(bst.pre_order(), vec![&3, &1, &2, &4, &5]);
     }
 
     #[test]
-    fn in_order_traversal_copy() {
+    fn in_order() {
         let mut bst = BinarySearchTree::empty();
         bst.insert(3);
         bst.insert(4);
@@ -637,11 +692,11 @@ mod bst_test {
         bst.insert(1);
         bst.insert(2);
 
-        assert_eq!(bst.in_order(), vec![1, 2, 3, 4, 5]);
+        assert_eq!(bst.in_order(), vec![&1, &2, &3, &4, &5]);
     }
 
     #[test]
-    fn post_order_traversal_copy() {
+    fn post_order() {
         let mut bst = BinarySearchTree::empty();
         bst.insert(3);
         bst.insert(4);
@@ -649,6 +704,6 @@ mod bst_test {
         bst.insert(1);
         bst.insert(2);
 
-        assert_eq!(bst.post_order(), vec![2, 1, 5, 4, 3]);
+        assert_eq!(bst.post_order(), vec![&2, &1, &5, &4, &3]);
     }
 }

@@ -17,12 +17,6 @@ struct Node<T: Ord> {
 
 type HeapNode<T> = Option<Box<Node<T>>>;
 
-impl<T: Ord + Display> Display for Node<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.value)
-    }
-}
-
 impl<T: Ord> PartialEq for Node<T> {
     fn eq(&self, other: &Self) -> bool {
         self.value == other.value
@@ -177,6 +171,16 @@ impl<T: Ord> Node<T> {
             Node::into_post_order_traversal(node.right, elements);
             elements.push(node.value);
         }
+    }
+}
+
+impl<T: Ord> From<Vec<T>> for BinarySearchTree<T> {
+    fn from(vec: Vec<T>) -> Self {
+        let mut tree = BinarySearchTree::empty();
+        for elem in vec.into_iter() {
+            tree.insert(elem);
+        }
+        tree
     }
 }
 
@@ -687,5 +691,31 @@ mod bst_test {
         bst.insert(2);
 
         assert_eq!(bst.post_order(), vec![&2, &1, &5, &4, &3]);
+    }
+
+    #[test]
+    fn create_bst_from_vec() {
+        let mut expected_bst = BinarySearchTree::empty();
+        expected_bst.insert(10);
+        expected_bst.insert(20);
+        expected_bst.insert(5);
+        expected_bst.insert(30);
+
+        let actual_bst = BinarySearchTree::from(vec![10, 20, 5, 30]);
+
+        assert_eq!(actual_bst, expected_bst);
+    }
+
+    #[test]
+    fn create_bst_from_into_vec() {
+        let mut expected_bst = BinarySearchTree::empty();
+        expected_bst.insert(10);
+        expected_bst.insert(20);
+        expected_bst.insert(5);
+        expected_bst.insert(30);
+
+        let actual_bst: BinarySearchTree<i32> = vec![10, 20, 5, 30].into();
+
+        assert_eq!(actual_bst, expected_bst);
     }
 }

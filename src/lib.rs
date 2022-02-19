@@ -3,8 +3,7 @@ use std::fmt::{Debug, Display, Formatter};
 use std::vec::IntoIter;
 
 pub trait BinarySearchTree<T: Ord> {
-    fn empty() -> Self;
-    fn new(value: T) -> Self;
+    fn new() -> Self;
     fn size(&self) -> usize;
     fn is_empty(&self) -> bool;
     fn insert(&mut self, value: T);
@@ -66,7 +65,7 @@ impl<T: Ord> Extend<T> for RecursiveBST<T> {
 
 impl<T: Ord> FromIterator<T> for RecursiveBST<T> {
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
-        let mut bst = RecursiveBST::empty();
+        let mut bst = RecursiveBST::new();
         bst.extend(iter);
         bst
     }
@@ -74,7 +73,7 @@ impl<T: Ord> FromIterator<T> for RecursiveBST<T> {
 
 impl<T: Ord> From<Vec<T>> for RecursiveBST<T> {
     fn from(vec: Vec<T>) -> Self {
-        let mut bst = RecursiveBST::empty();
+        let mut bst = RecursiveBST::new();
         for value in vec.into_iter() {
             bst.insert(value);
         }
@@ -84,7 +83,7 @@ impl<T: Ord> From<Vec<T>> for RecursiveBST<T> {
 
 impl<T: Ord + Clone> From<&[T]> for RecursiveBST<T> {
     fn from(slice: &[T]) -> Self {
-        let mut bst = RecursiveBST::empty();
+        let mut bst = RecursiveBST::new();
         for value in slice {
             bst.insert((*value).clone());
         }
@@ -94,7 +93,7 @@ impl<T: Ord + Clone> From<&[T]> for RecursiveBST<T> {
 
 impl<T: Ord + Clone> Clone for RecursiveBST<T> {
     fn clone(&self) -> Self {
-        let mut bst = RecursiveBST::empty();
+        let mut bst = RecursiveBST::new();
 
         for value in self.in_order_iter() {
             bst.insert((*value).clone());
@@ -126,7 +125,7 @@ impl<T: Ord> Extend<T> for IterativeBST<T> {
 
 impl<T: Ord> FromIterator<T> for IterativeBST<T> {
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
-        let mut bst = IterativeBST::empty();
+        let mut bst = IterativeBST::new();
         bst.extend(iter);
         bst
     }
@@ -134,7 +133,7 @@ impl<T: Ord> FromIterator<T> for IterativeBST<T> {
 
 impl<T: Ord> From<Vec<T>> for IterativeBST<T> {
     fn from(vec: Vec<T>) -> Self {
-        let mut bst = IterativeBST::empty();
+        let mut bst = IterativeBST::new();
         for value in vec.into_iter() {
             bst.insert(value);
         }
@@ -144,7 +143,7 @@ impl<T: Ord> From<Vec<T>> for IterativeBST<T> {
 
 impl<T: Ord + Clone> From<&[T]> for IterativeBST<T> {
     fn from(slice: &[T]) -> Self {
-        let mut bst = IterativeBST::empty();
+        let mut bst = IterativeBST::new();
         for value in slice {
             bst.insert((*value).clone());
         }
@@ -154,7 +153,7 @@ impl<T: Ord + Clone> From<&[T]> for IterativeBST<T> {
 
 impl<T: Ord + Clone> Clone for IterativeBST<T> {
     fn clone(&self) -> Self {
-        let mut bst = IterativeBST::empty();
+        let mut bst = IterativeBST::new();
 
         for value in self.in_order_iter() {
             bst.insert((*value).clone());
@@ -548,21 +547,22 @@ impl<T: Ord> Node<T> {
     }
 
     fn iterative_consume_in_order_vec(mut root: HeapNode<T>) -> Vec<T> {
-        let mut elements = Vec::new();
-        let mut stack = Vec::new();
-
-        while !stack.is_empty() || root.is_some() {
-            if root.is_some() {
-                stack.push(root.as_ref().unwrap());
-                root = root.unwrap().left;
-            } else {
-                let node = stack.pop();
-                elements.push(node.as_ref().unwrap().value);
-                root = node.as_ref().unwrap().right;
-            }
-        }
-
-        elements
+        // let mut elements = Vec::new();
+        // let mut stack = Vec::new();
+        //
+        // while !stack.is_empty() || root.is_some() {
+        //     if root.is_some() {
+        //         stack.push(root.as_ref().unwrap());
+        //         root = root.unwrap().left;
+        //     } else {
+        //         let node = stack.pop();
+        //         elements.push(node.as_ref().unwrap().value);
+        //         root = node.as_ref().unwrap().right;
+        //     }
+        // }
+        //
+        // elements
+        unimplemented!()
     }
 
     fn recursive_consume_in_order_vec(node: HeapNode<T>, elements: &mut Vec<T>) {
@@ -583,17 +583,10 @@ impl<T: Ord> Node<T> {
 }
 
 impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
-    fn empty() -> IterativeBST<T> {
+    fn new() -> IterativeBST<T> {
         IterativeBST {
             root: None,
             size: 0,
-        }
-    }
-
-    fn new(value: T) -> IterativeBST<T> {
-        IterativeBST {
-            root: Some(Box::from(Node::new(value))),
-            size: 1,
         }
     }
 
@@ -705,17 +698,10 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
 }
 
 impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
-    fn empty() -> RecursiveBST<T> {
+    fn new() -> RecursiveBST<T> {
         RecursiveBST {
             root: None,
             size: 0,
-        }
-    }
-
-    fn new(value: T) -> RecursiveBST<T> {
-        RecursiveBST {
-            root: Some(Box::from(Node::new(value))),
-            size: 1,
         }
     }
 

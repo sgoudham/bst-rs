@@ -2,8 +2,9 @@ use bst_rs::{BinarySearchTree, RecursiveBST};
 
 #[test]
 fn can_insert_element() {
-    let mut bst = RecursiveBST::new(-1);
+    let mut bst = RecursiveBST::new();
 
+    bst.insert(-1);
     bst.insert(0);
     bst.insert(1);
     bst.insert(1);
@@ -14,7 +15,7 @@ fn can_insert_element() {
 
 #[test]
 fn check_if_bst_is_empty() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     assert!(bst.is_empty());
 
     bst.insert(1);
@@ -23,7 +24,7 @@ fn check_if_bst_is_empty() {
 
 #[test]
 fn check_element_exists() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
 
     bst.insert(1);
     bst.insert(5);
@@ -35,7 +36,7 @@ fn check_element_exists() {
 
 #[test]
 fn remove_root_element() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     bst.insert(0);
 
     assert!(!bst.is_empty());
@@ -49,11 +50,11 @@ fn remove_root_element() {
 
 #[test]
 fn remove_leaf_node() {
-    let mut expected_bst = RecursiveBST::empty();
+    let mut expected_bst = RecursiveBST::new();
     expected_bst.insert(5);
     expected_bst.insert(4);
     expected_bst.insert(6);
-    let mut actual_bst = RecursiveBST::empty();
+    let mut actual_bst = RecursiveBST::new();
     actual_bst.insert(5);
     actual_bst.insert(4);
     actual_bst.insert(6);
@@ -67,12 +68,12 @@ fn remove_leaf_node() {
 
 #[test]
 fn remove_single_right_node_with_children() {
-    let mut expected_bst = RecursiveBST::empty();
+    let mut expected_bst = RecursiveBST::new();
     expected_bst.insert(5);
     expected_bst.insert(4);
     expected_bst.insert(7);
     expected_bst.insert(8);
-    let mut actual_bst = RecursiveBST::empty();
+    let mut actual_bst = RecursiveBST::new();
     actual_bst.insert(5);
     actual_bst.insert(4);
     actual_bst.insert(6);
@@ -87,12 +88,12 @@ fn remove_single_right_node_with_children() {
 
 #[test]
 fn remove_single_left_node_with_children() {
-    let mut expected_bst = RecursiveBST::empty();
+    let mut expected_bst = RecursiveBST::new();
     expected_bst.insert(5);
     expected_bst.insert(3);
     expected_bst.insert(2);
     expected_bst.insert(6);
-    let mut actual_bst = RecursiveBST::empty();
+    let mut actual_bst = RecursiveBST::new();
     actual_bst.insert(5);
     actual_bst.insert(4);
     actual_bst.insert(6);
@@ -107,12 +108,12 @@ fn remove_single_left_node_with_children() {
 
 #[test]
 fn remove_node_with_two_children() {
-    let mut expected_bst = RecursiveBST::empty();
+    let mut expected_bst = RecursiveBST::new();
     expected_bst.insert(10);
     expected_bst.insert(3);
     expected_bst.insert(8);
     expected_bst.insert(15);
-    let mut actual_bst = RecursiveBST::empty();
+    let mut actual_bst = RecursiveBST::new();
     actual_bst.insert(10);
     actual_bst.insert(5);
     actual_bst.insert(8);
@@ -126,14 +127,14 @@ fn remove_node_with_two_children() {
 
 #[test]
 fn does_not_fail_when_removing_non_existing_element() {
-    let mut expected_bst = RecursiveBST::empty();
+    let mut expected_bst = RecursiveBST::new();
     expected_bst.insert(10);
     expected_bst.insert(5);
     expected_bst.insert(8);
     expected_bst.insert(3);
     expected_bst.insert(15);
 
-    let mut actual_bst = RecursiveBST::empty();
+    let mut actual_bst = RecursiveBST::new();
     actual_bst.insert(10);
     actual_bst.insert(5);
     actual_bst.insert(8);
@@ -148,7 +149,7 @@ fn does_not_fail_when_removing_non_existing_element() {
 
 #[test]
 fn retrieve_element() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     bst.insert(5);
     bst.insert(10);
 
@@ -161,11 +162,11 @@ fn retrieve_element() {
 
 #[test]
 fn retrieve_element_as_mut_and_modify_bst() {
-    let mut expected_bst = RecursiveBST::empty();
+    let mut expected_bst = RecursiveBST::new();
     expected_bst.insert(10);
     expected_bst.insert(2);
 
-    let mut actual_bst = RecursiveBST::empty();
+    let mut actual_bst = RecursiveBST::new();
     actual_bst.insert(10);
     actual_bst.insert(5);
 
@@ -177,7 +178,7 @@ fn retrieve_element_as_mut_and_modify_bst() {
 
 #[test]
 fn get_min_from_bst() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     assert_eq!(bst.min(), None);
 
     bst.insert(5);
@@ -190,7 +191,7 @@ fn get_min_from_bst() {
 
 #[test]
 fn get_max_from_bst() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     assert_eq!(bst.max(), None);
 
     bst.insert(5);
@@ -203,7 +204,7 @@ fn get_max_from_bst() {
 
 #[test]
 fn remove_min_from_bst() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     assert_eq!(bst.remove_min(), None);
 
     bst.insert(5);
@@ -222,7 +223,7 @@ fn remove_min_from_bst() {
 
 #[test]
 fn remove_max_from_bst() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     assert_eq!(bst.remove_max(), None);
 
     bst.insert(5);
@@ -241,7 +242,7 @@ fn remove_max_from_bst() {
 
 #[test]
 fn pre_order_iter() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     bst.insert(3);
     bst.insert(4);
     bst.insert(5);
@@ -272,7 +273,7 @@ fn pre_order_iter() {
 
 #[test]
 fn in_order_iter() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     bst.insert(3);
     bst.insert(4);
     bst.insert(5);
@@ -303,7 +304,7 @@ fn in_order_iter() {
 
 #[test]
 fn post_order_iter() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     bst.insert(3);
     bst.insert(4);
     bst.insert(5);
@@ -335,7 +336,7 @@ fn post_order_iter() {
 
 #[test]
 fn into_pre_order_iter() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     bst.insert(3);
     bst.insert(4);
     bst.insert(5);
@@ -354,7 +355,7 @@ fn into_pre_order_iter() {
 
 #[test]
 fn into_in_order_iter() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     bst.insert(3);
     bst.insert(4);
     bst.insert(5);
@@ -373,7 +374,7 @@ fn into_in_order_iter() {
 
 #[test]
 fn into_post_order_iter() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     bst.insert(3);
     bst.insert(4);
     bst.insert(5);
@@ -392,7 +393,7 @@ fn into_post_order_iter() {
 
 #[test]
 fn get_sorted_vec() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     bst.insert(3);
     bst.insert(4);
     bst.insert(5);
@@ -404,7 +405,7 @@ fn get_sorted_vec() {
 
 #[test]
 fn bst_into_sorted_vec() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     bst.insert(3);
     bst.insert(4);
     bst.insert(5);
@@ -416,7 +417,7 @@ fn bst_into_sorted_vec() {
 
 #[test]
 fn get_pre_order_vec() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     bst.insert(3);
     bst.insert(4);
     bst.insert(5);
@@ -428,7 +429,7 @@ fn get_pre_order_vec() {
 
 #[test]
 fn get_in_order_vec() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     bst.insert(3);
     bst.insert(4);
     bst.insert(5);
@@ -440,7 +441,7 @@ fn get_in_order_vec() {
 
 #[test]
 fn get_post_order_vec() {
-    let mut bst = RecursiveBST::empty();
+    let mut bst = RecursiveBST::new();
     bst.insert(3);
     bst.insert(4);
     bst.insert(5);
@@ -452,7 +453,7 @@ fn get_post_order_vec() {
 
 #[test]
 fn create_bst_from_vec() {
-    let mut expected_bst = RecursiveBST::empty();
+    let mut expected_bst = RecursiveBST::new();
     expected_bst.insert(10);
     expected_bst.insert(20);
     expected_bst.insert(5);
@@ -465,7 +466,7 @@ fn create_bst_from_vec() {
 
 #[test]
 fn create_bst_from_slice() {
-    let mut expected_bst = RecursiveBST::empty();
+    let mut expected_bst = RecursiveBST::new();
     expected_bst.insert(10);
     expected_bst.insert(20);
     expected_bst.insert(5);
@@ -478,7 +479,7 @@ fn create_bst_from_slice() {
 
 #[test]
 fn create_bst_from_into_vec() {
-    let mut expected_bst = RecursiveBST::empty();
+    let mut expected_bst = RecursiveBST::new();
     expected_bst.insert(10);
     expected_bst.insert(20);
     expected_bst.insert(5);
@@ -492,14 +493,14 @@ fn create_bst_from_into_vec() {
 #[test]
 fn extend_bst_from_iter() {
     let vec = vec![8, 1, 10];
-    let mut expected_bst = RecursiveBST::empty();
+    let mut expected_bst = RecursiveBST::new();
     expected_bst.insert(3);
     expected_bst.insert(2);
     expected_bst.insert(5);
     expected_bst.insert(8);
     expected_bst.insert(1);
     expected_bst.insert(10);
-    let mut actual_bst = RecursiveBST::empty();
+    let mut actual_bst = RecursiveBST::new();
     actual_bst.insert(3);
     actual_bst.insert(2);
     actual_bst.insert(5);
@@ -512,7 +513,7 @@ fn extend_bst_from_iter() {
 
 #[test]
 fn create_bst_from_iter() {
-    let mut expected_bst = RecursiveBST::empty();
+    let mut expected_bst = RecursiveBST::new();
     expected_bst.insert(3);
     expected_bst.insert(2);
     expected_bst.insert(5);
@@ -527,7 +528,7 @@ fn create_bst_from_iter() {
 
 #[test]
 fn clone_bst() {
-    let mut expected_bst = RecursiveBST::empty();
+    let mut expected_bst = RecursiveBST::new();
     expected_bst.insert(3);
     expected_bst.insert(2);
     expected_bst.insert(5);
@@ -542,10 +543,10 @@ fn clone_bst() {
 
 #[test]
 fn clone_into_another_bst() {
-    let mut actual_bst = RecursiveBST::empty();
+    let mut actual_bst = RecursiveBST::new();
     actual_bst.insert(3);
     actual_bst.insert(2);
-    let mut expected_bst = RecursiveBST::empty();
+    let mut expected_bst = RecursiveBST::new();
     expected_bst.insert(3);
     expected_bst.insert(2);
     expected_bst.insert(5);

@@ -10,8 +10,8 @@ pub trait BinarySearchTree<T: Ord> {
     fn insert(&mut self, value: T);
     fn contains(&self, value: &T) -> bool;
     fn remove(&mut self, value: &T);
-    fn retrieve(&self, value: T) -> Option<&T>;
-    fn retrieve_as_mut(&mut self, value: T) -> Option<&mut T>;
+    fn retrieve(&self, value: &T) -> Option<&T>;
+    fn retrieve_as_mut(&mut self, value: &T) -> Option<&mut T>;
     fn min(&self) -> Option<&T>;
     fn max(&self) -> Option<&T>;
     fn remove_min(&mut self) -> Option<T>;
@@ -179,17 +179,15 @@ impl<T: Ord> Node<T> {
         }
     }
 
-    fn iterative_insert(root: &mut HeapNode<T>, value: T) -> Result<(), ()> {
-        let mut current = root;
-
-        while let Some(ref mut node) = current {
+    fn iterative_insert(mut root: &mut HeapNode<T>, value: T) -> Result<(), ()> {
+        while let Some(ref mut node) = root {
             match value.cmp(&node.value) {
                 Ordering::Equal => return Err(()),
-                Ordering::Less => current = &mut node.left,
-                Ordering::Greater => current = &mut node.right,
+                Ordering::Less => root = &mut node.left,
+                Ordering::Greater => root = &mut node.right,
             }
         }
-        *current = Some(Box::new(Node::new(value)));
+        *root = Some(Box::new(Node::new(value)));
 
         Ok(())
     }
@@ -214,6 +212,18 @@ impl<T: Ord> Node<T> {
         }
     }
 
+    fn iterative_contains(mut root: &HeapNode<T>, value: &T) -> bool {
+        while let Some(current) = root {
+            match value.cmp(&current.value) {
+                Ordering::Equal => return true,
+                Ordering::Less => root = &current.left,
+                Ordering::Greater => root = &current.right,
+            }
+        }
+
+        false
+    }
+
     fn recursive_contains(&self, value: &T) -> bool {
         match value.cmp(&self.value) {
             Ordering::Equal => true,
@@ -228,7 +238,19 @@ impl<T: Ord> Node<T> {
         }
     }
 
-    fn recursive_retrieve(&self, value: T) -> Option<&T> {
+    fn iterative_retrieve<'a>(mut root: &'a HeapNode<T>, value: &T) -> Option<&'a T> {
+        while let Some(current) = root {
+            match value.cmp(&current.value) {
+                Ordering::Equal => return Some(&current.value),
+                Ordering::Less => root = &current.left,
+                Ordering::Greater => root = &current.right,
+            }
+        }
+
+        None
+    }
+
+    fn recursive_retrieve(&self, value: &T) -> Option<&T> {
         match value.cmp(&self.value) {
             Ordering::Equal => Some(&self.value),
             Ordering::Less => match self.left {
@@ -242,7 +264,22 @@ impl<T: Ord> Node<T> {
         }
     }
 
-    fn recursive_retrieve_as_mut(&mut self, value: T) -> Option<&mut T> {
+    fn iterative_retrieve_as_mut<'a>(
+        mut root: &'a mut HeapNode<T>,
+        value: &T,
+    ) -> Option<&'a mut T> {
+        while let Some(current) = root {
+            match value.cmp(&current.value) {
+                Ordering::Equal => return Some(&mut current.value),
+                Ordering::Less => root = &mut current.left,
+                Ordering::Greater => root = &mut current.right,
+            }
+        }
+
+        None
+    }
+
+    fn recursive_retrieve_as_mut(&mut self, value: &T) -> Option<&mut T> {
         match value.cmp(&self.value) {
             Ordering::Equal => Some(&mut self.value),
             Ordering::Less => match self.left {
@@ -254,6 +291,30 @@ impl<T: Ord> Node<T> {
                 Some(ref mut node) => node.recursive_retrieve_as_mut(value),
             },
         }
+    }
+
+    fn iterative_remove(mut root: &mut HeapNode<T>, value: &T) -> Result<(), ()> {
+        while let Some(ref mut current) = root {
+            match value.cmp(&current.value) {
+                Ordering::Less => root = &mut root.as_mut().unwrap().left,
+                Ordering::Greater => root = &mut root.as_mut().unwrap().right,
+                Ordering::Equal => {
+                    match (current.left.as_mut(), current.right.as_mut()) {
+                        (None, None) => *root = None,
+                        (Some(_), None) => *root = current.left.take(),
+                        (None, Some(_)) => *root = current.right.take(),
+                        (Some(_), Some(_)) => {
+                            root.as_mut().unwrap().value =
+                                Node::recursive_remove_min(&mut current.right).unwrap()
+                        }
+                    }
+
+                    return Ok(());
+                }
+            }
+        }
+
+        Err(())
     }
 
     fn recursive_remove(root: &mut HeapNode<T>, value: &T) -> Result<(), ()> {
@@ -279,6 +340,17 @@ impl<T: Ord> Node<T> {
         Err(())
     }
 
+    fn iterative_min(mut root: &HeapNode<T>) -> Option<&T> {
+        while let Some(current) = root {
+            if current.left.is_none() {
+                return Some(&current.value);
+            }
+            root = &current.left;
+        }
+
+        None
+    }
+
     fn recursive_min(&self) -> Option<&T> {
         match &self.left {
             None => Some(&self.value),
@@ -286,11 +358,36 @@ impl<T: Ord> Node<T> {
         }
     }
 
+    fn iterative_max(mut root: &HeapNode<T>) -> Option<&T> {
+        while let Some(current) = root {
+            if current.right.is_none() {
+                return Some(&current.value);
+            }
+            root = &current.right;
+        }
+
+        None
+    }
+
     fn recursive_max(&self) -> Option<&T> {
         match &self.right {
             None => Some(&self.value),
             Some(node) => node.recursive_max(),
         }
+    }
+
+    fn iterative_remove_min(mut root: &mut HeapNode<T>) -> Option<T> {
+        if root.is_some() {
+            while root.as_ref().unwrap().left.is_some() {
+                root = &mut root.as_mut().unwrap().left
+            }
+
+            let node = root.take().unwrap();
+            *root = node.right;
+            return Some(node.value);
+        }
+
+        None
     }
 
     fn recursive_remove_min(root: &mut HeapNode<T>) -> Option<T> {
@@ -301,6 +398,20 @@ impl<T: Ord> Node<T> {
             *root = node.right;
             Some(node.value)
         }
+    }
+
+    fn iterative_remove_max(mut root: &mut HeapNode<T>) -> Option<T> {
+        if root.is_some() {
+            while root.as_ref().unwrap().right.is_some() {
+                root = &mut root.as_mut().unwrap().right
+            }
+
+            let node = root.take().unwrap();
+            *root = node.left;
+            return Some(node.value);
+        }
+
+        None
     }
 
     fn recursive_remove_max(root: &mut HeapNode<T>) -> Option<T> {
@@ -411,12 +522,47 @@ impl<T: Ord> Node<T> {
         }
     }
 
+    fn iterative_consume_pre_order_vec(node: HeapNode<T>) -> Vec<T> {
+        let mut elements = Vec::new();
+        let mut stack = vec![node];
+
+        while let Some(current) = stack.pop().unwrap_or(None) {
+            elements.push(current.value);
+            if current.right.is_some() {
+                stack.push(current.right);
+            }
+            if current.left.is_some() {
+                stack.push(current.left);
+            }
+        }
+
+        elements
+    }
+
     fn recursive_consume_pre_order_vec(node: HeapNode<T>, elements: &mut Vec<T>) {
         if let Some(node) = node {
             elements.push(node.value);
             Node::recursive_consume_pre_order_vec(node.left, elements);
             Node::recursive_consume_pre_order_vec(node.right, elements);
         }
+    }
+
+    fn iterative_consume_in_order_vec(mut root: HeapNode<T>) -> Vec<T> {
+        let mut elements = Vec::new();
+        let mut stack = Vec::new();
+
+        while !stack.is_empty() || root.is_some() {
+            if root.is_some() {
+                stack.push(root.as_ref().unwrap());
+                root = root.unwrap().left;
+            } else {
+                let node = stack.pop();
+                elements.push(node.as_ref().unwrap().value);
+                root = node.as_ref().unwrap().right;
+            }
+        }
+
+        elements
     }
 
     fn recursive_consume_in_order_vec(node: HeapNode<T>, elements: &mut Vec<T>) {
@@ -466,69 +612,44 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
     }
 
     fn contains(&self, value: &T) -> bool {
-        match self.root {
-            None => false,
-            Some(ref node) => node.recursive_contains(value),
-        }
+        Node::iterative_contains(&self.root, value)
     }
 
     fn remove(&mut self, value: &T) {
-        if Node::recursive_remove(&mut self.root, value).is_ok() {
+        if Node::iterative_remove(&mut self.root, value).is_ok() {
             self.size -= 1;
         }
     }
 
-    fn retrieve(&self, value: T) -> Option<&T> {
-        match self.root {
-            None => None,
-            Some(ref node) => node.recursive_retrieve(value),
-        }
+    fn retrieve(&self, value: &T) -> Option<&T> {
+        Node::iterative_retrieve(&self.root, value)
     }
 
-    fn retrieve_as_mut(&mut self, value: T) -> Option<&mut T> {
-        match self.root {
-            None => None,
-            Some(ref mut node) => node.recursive_retrieve_as_mut(value),
-        }
+    fn retrieve_as_mut(&mut self, value: &T) -> Option<&mut T> {
+        Node::iterative_retrieve_as_mut(&mut self.root, value)
     }
 
     fn min(&self) -> Option<&T> {
-        match self.root {
-            None => None,
-            Some(ref node) => node.recursive_min(),
-        }
+        Node::iterative_min(&self.root)
     }
 
     fn max(&self) -> Option<&T> {
-        match self.root {
-            None => None,
-            Some(ref node) => node.recursive_max(),
-        }
+        Node::iterative_max(&self.root)
     }
 
     fn remove_min(&mut self) -> Option<T> {
-        let removed_min = match self.root {
-            None => None,
-            Some(_) => Node::recursive_remove_min(&mut self.root),
-        };
-
+        let removed_min = Node::iterative_remove_min(&mut self.root);
         if removed_min.is_some() {
             self.size -= 1;
         }
-
         removed_min
     }
 
     fn remove_max(&mut self) -> Option<T> {
-        let removed_max = match self.root {
-            None => None,
-            Some(_) => Node::recursive_remove_max(&mut self.root),
-        };
-
+        let removed_max = Node::iterative_remove_max(&mut self.root);
         if removed_max.is_some() {
             self.size -= 1;
         }
-
         removed_max
     }
 
@@ -567,9 +688,7 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
     }
 
     fn into_pre_order_iter(self) -> IntoIter<T> {
-        let mut elements = Vec::new();
-        Node::recursive_consume_pre_order_vec(self.root, &mut elements);
-        elements.into_iter()
+        Node::iterative_consume_pre_order_vec(self.root).into_iter()
     }
 
     fn into_in_order_iter(self) -> IntoIter<T> {
@@ -635,14 +754,14 @@ impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
         }
     }
 
-    fn retrieve(&self, value: T) -> Option<&T> {
+    fn retrieve(&self, value: &T) -> Option<&T> {
         match self.root {
             None => None,
             Some(ref node) => node.recursive_retrieve(value),
         }
     }
 
-    fn retrieve_as_mut(&mut self, value: T) -> Option<&mut T> {
+    fn retrieve_as_mut(&mut self, value: &T) -> Option<&mut T> {
         match self.root {
             None => None,
             Some(ref mut node) => node.recursive_retrieve_as_mut(value),

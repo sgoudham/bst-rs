@@ -152,8 +152,8 @@ fn retrieve_element() {
     bst.insert(5);
     bst.insert(10);
 
-    let retrieved_value = bst.retrieve(5);
-    let invalid_value = bst.retrieve(15);
+    let retrieved_value = bst.retrieve(&5);
+    let invalid_value = bst.retrieve(&15);
 
     assert_eq!(retrieved_value, Some(&5));
     assert_eq!(invalid_value, None);
@@ -169,7 +169,7 @@ fn retrieve_element_as_mut_and_modify_bst() {
     actual_bst.insert(10);
     actual_bst.insert(5);
 
-    let _retrieved_value_as_mut: &mut i32 = actual_bst.retrieve_as_mut(5).unwrap();
+    let _retrieved_value_as_mut: &mut i32 = actual_bst.retrieve_as_mut(&5).unwrap();
     *_retrieved_value_as_mut = 2;
 
     assert_eq!(actual_bst, expected_bst);

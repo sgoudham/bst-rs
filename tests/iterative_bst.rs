@@ -1,7 +1,9 @@
+use std::vec::IntoIter;
+
 use bst_rs::{BinarySearchTree, IterativeBST};
 
 #[test]
-fn can_insert_element() {
+fn successfully_insert_elements_into_bst() {
     let mut expected_bst = IterativeBST::empty();
     expected_bst.insert(-1);
     expected_bst.insert(0);
@@ -17,6 +19,7 @@ fn can_insert_element() {
     actual_bst.insert(-20);
 
     assert_eq!(actual_bst, expected_bst);
+    assert_eq!(actual_bst.size(), 5);
 }
 
 #[test]
@@ -29,8 +32,9 @@ fn check_if_bst_is_empty() {
 }
 
 #[test]
-fn check_element_exists() {
+fn check_if_bst_contains_elements() {
     let mut bst = IterativeBST::empty();
+    assert!(!bst.contains(&10));
 
     bst.insert(1);
     bst.insert(5);
@@ -41,12 +45,9 @@ fn check_element_exists() {
 }
 
 #[test]
-fn remove_root_element() {
+fn successfully_remove_root_node_from_bst() {
     let mut bst = IterativeBST::empty();
     bst.insert(0);
-
-    assert!(!bst.is_empty());
-    assert_eq!(bst.size(), 1);
 
     bst.remove(&0);
 
@@ -55,7 +56,7 @@ fn remove_root_element() {
 }
 
 #[test]
-fn remove_leaf_node() {
+fn successfully_remove_leaf_node() {
     let mut expected_bst = IterativeBST::empty();
     expected_bst.insert(5);
     expected_bst.insert(4);
@@ -88,6 +89,7 @@ fn remove_single_right_node_with_children() {
 
     actual_bst.remove(&6);
 
+    println!("{}", actual_bst);
     assert_eq!(actual_bst.size(), 4);
     assert_eq!(actual_bst, expected_bst);
 }
@@ -159,8 +161,8 @@ fn retrieve_element() {
     bst.insert(5);
     bst.insert(10);
 
-    let retrieved_value = bst.retrieve(5);
-    let invalid_value = bst.retrieve(15);
+    let retrieved_value = bst.retrieve(&5);
+    let invalid_value = bst.retrieve(&15);
 
     assert_eq!(retrieved_value, Some(&5));
     assert_eq!(invalid_value, None);
@@ -176,7 +178,7 @@ fn retrieve_element_as_mut_and_modify_bst() {
     actual_bst.insert(10);
     actual_bst.insert(5);
 
-    let _retrieved_value_as_mut: &mut i32 = actual_bst.retrieve_as_mut(5).unwrap();
+    let _retrieved_value_as_mut: &mut i32 = actual_bst.retrieve_as_mut(&5).unwrap();
     *_retrieved_value_as_mut = 2;
 
     assert_eq!(actual_bst, expected_bst);
@@ -342,6 +344,9 @@ fn post_order_iter() {
 
 #[test]
 fn into_pre_order_iter() {
+    let mut iter: IntoIter<i32> = IterativeBST::empty().into_pre_order_iter();
+    assert_eq!(iter.next(), None);
+
     let mut bst = IterativeBST::empty();
     bst.insert(3);
     bst.insert(4);

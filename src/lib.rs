@@ -110,6 +110,66 @@ impl<T: Ord + Debug> Display for RecursiveBST<T> {
     }
 }
 
+impl<T: Ord> PartialEq for IterativeBST<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.sorted_vec() == other.sorted_vec()
+    }
+}
+
+impl<T: Ord> Extend<T> for IterativeBST<T> {
+    fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
+        for value in iter.into_iter() {
+            self.insert(value)
+        }
+    }
+}
+
+impl<T: Ord> FromIterator<T> for IterativeBST<T> {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        let mut bst = IterativeBST::empty();
+        bst.extend(iter);
+        bst
+    }
+}
+
+impl<T: Ord> From<Vec<T>> for IterativeBST<T> {
+    fn from(vec: Vec<T>) -> Self {
+        let mut bst = IterativeBST::empty();
+        for value in vec.into_iter() {
+            bst.insert(value);
+        }
+        bst
+    }
+}
+
+impl<T: Ord + Clone> From<&[T]> for IterativeBST<T> {
+    fn from(slice: &[T]) -> Self {
+        let mut bst = IterativeBST::empty();
+        for value in slice {
+            bst.insert((*value).clone());
+        }
+        bst
+    }
+}
+
+impl<T: Ord + Clone> Clone for IterativeBST<T> {
+    fn clone(&self) -> Self {
+        let mut bst = IterativeBST::empty();
+
+        for value in self.in_order_iter() {
+            bst.insert((*value).clone());
+        }
+
+        bst
+    }
+}
+
+impl<T: Ord + Debug> Display for IterativeBST<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.sorted_vec())
+    }
+}
+
 impl<T: Ord> Node<T> {
     fn new(value: T) -> Node<T> {
         Node {
@@ -117,6 +177,21 @@ impl<T: Ord> Node<T> {
             left: None,
             right: None,
         }
+    }
+
+    fn iterative_insert(root: &mut HeapNode<T>, value: T) -> Result<(), ()> {
+        let mut current = root;
+
+        while let Some(ref mut node) = current {
+            match value.cmp(&node.value) {
+                Ordering::Equal => return Err(()),
+                Ordering::Less => current = &mut node.left,
+                Ordering::Greater => current = &mut node.right,
+            }
+        }
+        *current = Some(Box::new(Node::new(value)));
+
+        Ok(())
     }
 
     fn recursive_insert(&mut self, value: T) -> Result<(), ()> {
@@ -238,6 +313,23 @@ impl<T: Ord> Node<T> {
         }
     }
 
+    fn iterative_pre_order_vec(node: &HeapNode<T>) -> Vec<&T> {
+        let mut elements = Vec::new();
+        let mut stack = vec![node.as_ref()];
+
+        while let Some(current) = stack.pop().unwrap_or(None) {
+            elements.push(&current.value);
+            if current.right.is_some() {
+                stack.push(current.right.as_ref());
+            }
+            if current.left.is_some() {
+                stack.push(current.left.as_ref());
+            }
+        }
+
+        elements
+    }
+
     fn recursive_pre_order_vec<'a>(node: &'a HeapNode<T>, elements: &mut Vec<&'a T>) {
         if let Some(ref node) = node {
             elements.push(&node.value);
@@ -246,12 +338,69 @@ impl<T: Ord> Node<T> {
         }
     }
 
+    fn iterative_in_order_vec(node: &HeapNode<T>) -> Vec<&T> {
+        let mut root = node;
+        let mut elements = Vec::new();
+        let mut stack = Vec::new();
+
+        while !stack.is_empty() || root.is_some() {
+            if root.is_some() {
+                stack.push(root);
+                root = &root.as_ref().unwrap().left;
+            } else {
+                let node = stack.pop().unwrap();
+                elements.push(&node.as_ref().unwrap().value);
+                root = &node.as_ref().unwrap().right;
+            }
+        }
+
+        elements
+    }
+
     fn recursive_in_order_vec<'a>(node: &'a HeapNode<T>, elements: &mut Vec<&'a T>) {
         if let Some(ref node) = node {
             Node::recursive_in_order_vec(&node.left, elements);
             elements.push(&node.value);
             Node::recursive_in_order_vec(&node.right, elements);
         }
+    }
+
+    fn iterative_post_order_vec(node: &HeapNode<T>) -> Vec<&T> {
+        let mut root = node;
+        let mut elements = Vec::new();
+        let mut stack = Vec::new();
+
+        loop {
+            while let Some(current) = root {
+                if current.right.is_some() {
+                    stack.push(current.right.as_ref().unwrap());
+                }
+                stack.push(root.as_ref().unwrap());
+                root = &current.left;
+            }
+
+            if stack.is_empty() {
+                break;
+            }
+
+            if let Some(current) = stack.pop() {
+                if !stack.is_empty()
+                    && current.right.is_some()
+                    && stack.last().unwrap().value == current.right.as_ref().unwrap().value
+                {
+                    stack.pop();
+                    stack.push(current);
+                    root = &current.right;
+                } else {
+                    elements.push(&current.value);
+                    root = &None;
+                }
+            } else {
+                break;
+            }
+        }
+
+        elements
     }
 
     fn recursive_post_order_vec<'a>(node: &'a HeapNode<T>, elements: &mut Vec<&'a T>) {
@@ -284,6 +433,155 @@ impl<T: Ord> Node<T> {
             Node::recursive_consume_post_order_vec(node.right, elements);
             elements.push(node.value);
         }
+    }
+}
+
+impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
+    fn empty() -> IterativeBST<T> {
+        IterativeBST {
+            root: None,
+            size: 0,
+        }
+    }
+
+    fn new(value: T) -> IterativeBST<T> {
+        IterativeBST {
+            root: Some(Box::from(Node::new(value))),
+            size: 1,
+        }
+    }
+
+    fn size(&self) -> usize {
+        self.size
+    }
+
+    fn is_empty(&self) -> bool {
+        self.size == 0
+    }
+
+    fn insert(&mut self, value: T) {
+        if Node::iterative_insert(&mut self.root, value).is_ok() {
+            self.size += 1;
+        }
+    }
+
+    fn contains(&self, value: &T) -> bool {
+        match self.root {
+            None => false,
+            Some(ref node) => node.recursive_contains(value),
+        }
+    }
+
+    fn remove(&mut self, value: &T) {
+        if Node::recursive_remove(&mut self.root, value).is_ok() {
+            self.size -= 1;
+        }
+    }
+
+    fn retrieve(&self, value: T) -> Option<&T> {
+        match self.root {
+            None => None,
+            Some(ref node) => node.recursive_retrieve(value),
+        }
+    }
+
+    fn retrieve_as_mut(&mut self, value: T) -> Option<&mut T> {
+        match self.root {
+            None => None,
+            Some(ref mut node) => node.recursive_retrieve_as_mut(value),
+        }
+    }
+
+    fn min(&self) -> Option<&T> {
+        match self.root {
+            None => None,
+            Some(ref node) => node.recursive_min(),
+        }
+    }
+
+    fn max(&self) -> Option<&T> {
+        match self.root {
+            None => None,
+            Some(ref node) => node.recursive_max(),
+        }
+    }
+
+    fn remove_min(&mut self) -> Option<T> {
+        let removed_min = match self.root {
+            None => None,
+            Some(_) => Node::recursive_remove_min(&mut self.root),
+        };
+
+        if removed_min.is_some() {
+            self.size -= 1;
+        }
+
+        removed_min
+    }
+
+    fn remove_max(&mut self) -> Option<T> {
+        let removed_max = match self.root {
+            None => None,
+            Some(_) => Node::recursive_remove_max(&mut self.root),
+        };
+
+        if removed_max.is_some() {
+            self.size -= 1;
+        }
+
+        removed_max
+    }
+
+    fn sorted_vec(&self) -> Vec<&T> {
+        Node::iterative_in_order_vec(&self.root)
+    }
+
+    fn into_sorted_vec(self) -> Vec<T> {
+        let mut elements = Vec::new();
+        Node::recursive_consume_in_order_vec(self.root, &mut elements);
+        elements
+    }
+
+    fn pre_order_vec(&self) -> Vec<&T> {
+        Node::iterative_pre_order_vec(&self.root)
+    }
+
+    fn in_order_vec(&self) -> Vec<&T> {
+        Node::iterative_in_order_vec(&self.root)
+    }
+
+    fn post_order_vec(&self) -> Vec<&T> {
+        Node::iterative_post_order_vec(&self.root)
+    }
+
+    fn pre_order_iter(&self) -> IntoIter<&T> {
+        Node::iterative_pre_order_vec(&self.root).into_iter()
+    }
+
+    fn in_order_iter(&self) -> IntoIter<&T> {
+        Node::iterative_in_order_vec(&self.root).into_iter()
+    }
+
+    fn post_order_iter(&self) -> IntoIter<&T> {
+        Node::iterative_post_order_vec(&self.root).into_iter()
+    }
+
+    fn into_pre_order_iter(self) -> IntoIter<T> {
+        let mut elements = Vec::new();
+        Node::recursive_consume_pre_order_vec(self.root, &mut elements);
+        elements.into_iter()
+    }
+
+    fn into_in_order_iter(self) -> IntoIter<T> {
+        let mut elements = Vec::new();
+        Node::recursive_consume_in_order_vec(self.root, &mut elements);
+        elements.into_iter()
+    }
+
+    fn into_post_order_iter(self) -> IntoIter<T> {
+        let mut elements = Vec::new();
+        Node::recursive_consume_post_order_vec(self.root, &mut elements);
+        elements.into_iter()
     }
 }
 

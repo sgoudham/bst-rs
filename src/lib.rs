@@ -474,42 +474,42 @@ impl<T: Ord> Node<T> {
         }
     }
 
-    fn iterative_post_order_vec(node: &HeapNode<T>) -> Vec<&T> {
-        let mut root = node;
+    fn iterative_post_order_vec(mut root: &HeapNode<T>) -> Vec<&T> {
         let mut elements = Vec::new();
         let mut stack = Vec::new();
 
-        loop {
-            while let Some(current) = root {
-                if current.right.is_some() {
-                    stack.push(current.right.as_ref().unwrap());
+        while !stack.is_empty() || root.is_some() {
+            match root {
+                Some(node) => {
+                    stack.push(root);
+                    root = &node.left
                 }
-                stack.push(root.as_ref().unwrap());
-                root = &current.left;
-            }
+                None => {
+                    let mut node = Node::right_node(&stack);
+                    match node {
+                        Some(_) => root = node,
+                        None => {
+                            node = stack.pop().unwrap();
+                            elements.push(&node.as_ref().unwrap().value);
 
-            if stack.is_empty() {
-                break;
-            }
-
-            if let Some(current) = stack.pop() {
-                if !stack.is_empty()
-                    && current.right.is_some()
-                    && stack.last().unwrap().value == current.right.as_ref().unwrap().value
-                {
-                    stack.pop();
-                    stack.push(current);
-                    root = &current.right;
-                } else {
-                    elements.push(&current.value);
-                    root = &None;
+                            while !stack.is_empty()
+                                && node.as_ref().unwrap().value
+                                    == Node::right_node(&stack).as_ref().unwrap().value
+                            {
+                                node = stack.pop().unwrap();
+                                elements.push(&node.as_ref().unwrap().value);
+                            }
+                        }
+                    }
                 }
-            } else {
-                break;
             }
         }
 
         elements
+    }
+
+    fn right_node<'a>(stack: &[&'a HeapNode<T>]) -> &'a HeapNode<T> {
+        &stack.last().unwrap().as_ref().unwrap().right
     }
 
     fn recursive_post_order_vec<'a>(node: &'a HeapNode<T>, elements: &mut Vec<&'a T>) {
@@ -574,43 +574,44 @@ impl<T: Ord> Node<T> {
         }
     }
 
-    fn iterative_consume_post_order_vec(node: HeapNode<T>) -> Vec<T> {
-        // let mut root = node;
-        // let mut elements = Vec::new();
-        // let mut stack = Vec::new();
-        //
-        // loop {
-        //     while let Some(current) = root {
-        //         if current.right.is_some() {
-        //             stack.push(current.right.as_ref().unwrap());
+    fn iterative_consume_post_order_vec(root: HeapNode<T>) -> Vec<T> {
+        let mut elements = Vec::new();
+        let mut stack = vec![root];
+
+        // while !stack.is_empty() {
+        //     match stack.pop().unwrap() {
+        //         Some(mut node) => {
+        //             let left_node = node.left.take();
+        //             stack.push(Some(node));
+        //             stack.push(left_node);
         //         }
-        //         stack.push(root.as_ref().unwrap());
-        //         root = current.left;
-        //     }
+        //         None => {
+        //             let mut node = stack.pop().unwrap();
+        //             match node {
+        //                 Some(mut node) => {
+        //                     let option = node.right.take();
+        //                     stack.push(Some(node));
+        //                     stack.push(option)
+        //                 },
+        //                 None => {
+        //                     let something = node.take().unwrap();
         //
-        //     if stack.is_empty() {
-        //         break;
-        //     }
+        //                     while !stack.is_empty() {
+        //                         let something_2 = stack.pop().unwrap().take().unwrap();
+        //                         if something.value == something_2.value {
+        //                             break;
+        //                         }
+        //                         elements.push(something_2.value);
+        //                     }
         //
-        //     if let Some(current) = stack.pop() {
-        //         if !stack.is_empty()
-        //             && current.right.is_some()
-        //             && stack.last().unwrap().value == current.right.as_ref().unwrap().value
-        //         {
-        //             stack.pop();
-        //             stack.push(current);
-        //             root = current.right;
-        //         } else {
-        //             elements.push(current.value);
-        //             root = None;
+        //                     elements.push(something.value);
+        //                 }
+        //             }
         //         }
-        //     } else {
-        //         break;
         //     }
         // }
-        //
-        // elements
-        unimplemented!()
+
+        elements
     }
 
     fn recursive_consume_post_order_vec(node: HeapNode<T>, elements: &mut Vec<T>) {
@@ -727,9 +728,7 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
     }
 
     fn into_post_order_iter(self) -> IntoIter<T> {
-        let mut elements = Vec::new();
-        Node::recursive_consume_post_order_vec(self.root, &mut elements);
-        elements.into_iter()
+        Node::iterative_consume_post_order_vec(self.root).into_iter()
     }
 }
 

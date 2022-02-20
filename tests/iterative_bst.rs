@@ -388,6 +388,10 @@ fn into_in_order_iter() {
 
 #[test]
 fn into_post_order_iter() {
+    let another_bst: IterativeBST<i32> = IterativeBST::new();
+    let mut iter = another_bst.into_post_order_iter();
+    assert_eq!(iter.next(), None);
+
     let mut bst = IterativeBST::new();
     bst.insert(3);
     bst.insert(4);

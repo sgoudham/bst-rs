@@ -11,7 +11,4 @@ keywords = ["bst", "algorithms", "data-structures", "structure", "tree"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[lib]
-name = "bst_rs"
-
 [dependencies]

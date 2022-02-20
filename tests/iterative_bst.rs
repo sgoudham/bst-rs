@@ -520,7 +520,7 @@ fn successfully_get_in_order_vec() {
 }
 
 #[test]
-fn get_post_order_vec() {
+fn successfully_get_post_order_vec() {
     let mut bst = IterativeBST::new();
     assert!(bst.post_order_vec().is_empty());
 
@@ -529,11 +529,12 @@ fn get_post_order_vec() {
     bst.insert(5);
     bst.insert(1);
     bst.insert(2);
+
     assert_eq!(bst.post_order_vec(), vec![&2, &1, &5, &4, &3]);
 }
 
 #[test]
-fn create_bst_from_vec() {
+fn successfully_create_bst_from_vec() {
     let mut expected_bst = IterativeBST::new();
     expected_bst.insert(10);
     expected_bst.insert(20);
@@ -546,7 +547,7 @@ fn create_bst_from_vec() {
 }
 
 #[test]
-fn create_bst_from_slice() {
+fn successfully_create_bst_from_slice() {
     let mut expected_bst = IterativeBST::new();
     expected_bst.insert(10);
     expected_bst.insert(20);
@@ -559,7 +560,7 @@ fn create_bst_from_slice() {
 }
 
 #[test]
-fn create_bst_from_into_vec() {
+fn successfully_create_bst_from_into_vec() {
     let mut expected_bst = IterativeBST::new();
     expected_bst.insert(10);
     expected_bst.insert(20);
@@ -572,7 +573,7 @@ fn create_bst_from_into_vec() {
 }
 
 #[test]
-fn extend_bst_from_iter() {
+fn successfully_extend_bst_from_iter() {
     let vec = vec![8, 1, 10];
     let mut expected_bst = IterativeBST::new();
     expected_bst.insert(3);
@@ -593,7 +594,7 @@ fn extend_bst_from_iter() {
 }
 
 #[test]
-fn create_bst_from_iter() {
+fn successfully_create_bst_from_iter() {
     let mut expected_bst = IterativeBST::new();
     expected_bst.insert(3);
     expected_bst.insert(2);
@@ -608,7 +609,7 @@ fn create_bst_from_iter() {
 }
 
 #[test]
-fn clone_bst() {
+fn successfully_clone_bst() {
     let mut expected_bst = IterativeBST::new();
     expected_bst.insert(3);
     expected_bst.insert(2);
@@ -623,7 +624,7 @@ fn clone_bst() {
 }
 
 #[test]
-fn clone_into_another_bst() {
+fn successfully_clone_into_another_bst() {
     let mut actual_bst = IterativeBST::new();
     actual_bst.insert(3);
     actual_bst.insert(2);

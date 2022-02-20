@@ -73,7 +73,7 @@ fn successfully_remove_leaf_node() {
 }
 
 #[test]
-fn remove_single_right_node_with_children() {
+fn successfully_remove_single_right_node_with_children() {
     let mut expected_bst = IterativeBST::new();
     expected_bst.insert(5);
     expected_bst.insert(4);
@@ -94,7 +94,7 @@ fn remove_single_right_node_with_children() {
 }
 
 #[test]
-fn remove_single_left_node_with_children() {
+fn successfully_remove_single_left_node_with_children() {
     let mut expected_bst = IterativeBST::new();
     expected_bst.insert(5);
     expected_bst.insert(3);
@@ -114,7 +114,7 @@ fn remove_single_left_node_with_children() {
 }
 
 #[test]
-fn remove_node_with_two_children() {
+fn successfully_remove_node_with_two_children() {
     let mut expected_bst = IterativeBST::new();
     expected_bst.insert(10);
     expected_bst.insert(3);
@@ -133,7 +133,7 @@ fn remove_node_with_two_children() {
 }
 
 #[test]
-fn does_not_fail_when_removing_non_existing_element() {
+fn successfully_does_not_fail_when_removing_non_existing_element() {
     let mut expected_bst = IterativeBST::new();
     expected_bst.insert(10);
     expected_bst.insert(5);
@@ -155,7 +155,7 @@ fn does_not_fail_when_removing_non_existing_element() {
 }
 
 #[test]
-fn retrieve_element() {
+fn successfully_retrieve_element() {
     let mut bst = IterativeBST::new();
     bst.insert(5);
     bst.insert(10);
@@ -168,7 +168,7 @@ fn retrieve_element() {
 }
 
 #[test]
-fn retrieve_element_as_mut_and_modify_bst() {
+fn successfully_retrieve_element_as_mut_and_modify_bst() {
     let mut expected_bst = IterativeBST::new();
     expected_bst.insert(10);
     expected_bst.insert(2);
@@ -184,7 +184,7 @@ fn retrieve_element_as_mut_and_modify_bst() {
 }
 
 #[test]
-fn get_min_from_bst() {
+fn successfully_get_min_from_bst() {
     let mut bst = IterativeBST::new();
     assert_eq!(bst.min(), None);
 
@@ -197,7 +197,7 @@ fn get_min_from_bst() {
 }
 
 #[test]
-fn get_max_from_bst() {
+fn successfully_get_max_from_bst() {
     let mut bst = IterativeBST::new();
     assert_eq!(bst.max(), None);
 
@@ -210,7 +210,7 @@ fn get_max_from_bst() {
 }
 
 #[test]
-fn remove_min_from_bst() {
+fn successfully_remove_min_from_bst() {
     let mut bst = IterativeBST::new();
     assert_eq!(bst.remove_min(), None);
 
@@ -229,7 +229,7 @@ fn remove_min_from_bst() {
 }
 
 #[test]
-fn remove_max_from_bst() {
+fn successfully_remove_max_from_bst() {
     let mut bst = IterativeBST::new();
     assert_eq!(bst.remove_max(), None);
 
@@ -319,7 +319,6 @@ fn post_order_iter() {
     bst.insert(2);
 
     let mut post_order_iter = bst.post_order_iter();
-    println!("{:?}", bst);
 
     assert_eq!(post_order_iter.next(), Some(&2));
     assert_eq!(post_order_iter.next(), Some(&1));
@@ -342,6 +341,26 @@ fn post_order_iter() {
 }
 
 #[test]
+fn into_pre_order_iter_with_no_elements() {
+    let bst: IterativeBST<i32> = IterativeBST::new();
+
+    let mut pre_order_traversal = bst.into_pre_order_iter();
+
+    assert_eq!(pre_order_traversal.next(), None);
+}
+
+#[test]
+fn into_pre_order_iter_with_one_element() {
+    let mut bst = IterativeBST::new();
+    bst.insert(3);
+
+    let mut pre_order_traversal = bst.into_pre_order_iter();
+
+    assert_eq!(pre_order_traversal.next(), Some(3));
+    assert_eq!(pre_order_traversal.next(), None);
+}
+
+#[test]
 fn into_pre_order_iter() {
     let mut iter: IntoIter<i32> = IterativeBST::new().into_pre_order_iter();
     assert_eq!(iter.next(), None);
@@ -361,6 +380,26 @@ fn into_pre_order_iter() {
     assert_eq!(pre_order_iter.next(), Some(4));
     assert_eq!(pre_order_iter.next(), Some(5));
     assert_eq!(pre_order_iter.next(), None);
+}
+
+#[test]
+fn into_in_order_iter_with_no_elements() {
+    let bst: IterativeBST<i32> = IterativeBST::new();
+
+    let mut in_order_traversal = bst.into_in_order_iter();
+
+    assert_eq!(in_order_traversal.next(), None);
+}
+
+#[test]
+fn into_in_order_iter_with_one_element() {
+    let mut bst = IterativeBST::new();
+    bst.insert(3);
+
+    let mut in_order_traversal = bst.into_in_order_iter();
+
+    assert_eq!(in_order_traversal.next(), Some(3));
+    assert_eq!(in_order_traversal.next(), None);
 }
 
 #[test]
@@ -387,11 +426,27 @@ fn into_in_order_iter() {
 }
 
 #[test]
-fn into_post_order_iter() {
-    let another_bst: IterativeBST<i32> = IterativeBST::new();
-    let mut iter = another_bst.into_post_order_iter();
-    assert_eq!(iter.next(), None);
+fn into_post_order_iter_with_no_elements() {
+    let bst: IterativeBST<i32> = IterativeBST::new();
 
+    let mut post_order_traversal = bst.into_post_order_iter();
+
+    assert_eq!(post_order_traversal.next(), None);
+}
+
+#[test]
+fn into_post_order_iter_with_one_element() {
+    let mut bst = IterativeBST::new();
+    bst.insert(3);
+
+    let mut post_order_traversal = bst.into_post_order_iter();
+
+    assert_eq!(post_order_traversal.next(), Some(3));
+    assert_eq!(post_order_traversal.next(), None);
+}
+
+#[test]
+fn into_post_order_iter_with_many_elements() {
     let mut bst = IterativeBST::new();
     bst.insert(3);
     bst.insert(4);
@@ -410,7 +465,10 @@ fn into_post_order_iter() {
 }
 
 #[test]
-fn get_sorted_vec() {
+fn successfully_get_sorted_vec() {
+    let bst: IterativeBST<i32> = IterativeBST::new();
+    assert!(bst.sorted_vec().is_empty());
+
     let mut bst = IterativeBST::new();
     bst.insert(3);
     bst.insert(4);
@@ -422,7 +480,7 @@ fn get_sorted_vec() {
 }
 
 #[test]
-fn bst_into_sorted_vec() {
+fn successfully_transfer_bst_into_sorted_vec() {
     let mut bst = IterativeBST::new();
     bst.insert(3);
     bst.insert(4);
@@ -434,7 +492,7 @@ fn bst_into_sorted_vec() {
 }
 
 #[test]
-fn get_pre_order_vec() {
+fn successfully_get_pre_order_vec() {
     let mut bst = IterativeBST::new();
     assert!(bst.pre_order_vec().is_empty());
 
@@ -448,7 +506,7 @@ fn get_pre_order_vec() {
 }
 
 #[test]
-fn get_in_order_vec() {
+fn successfully_get_in_order_vec() {
     let mut bst = IterativeBST::new();
     assert!(bst.in_order_vec().is_empty());
 

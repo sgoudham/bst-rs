@@ -448,8 +448,7 @@ impl<T: Ord> Node<T> {
         }
     }
 
-    fn iterative_in_order_vec(node: &HeapNode<T>) -> Vec<&T> {
-        let mut root = node;
+    fn iterative_in_order_vec(mut root: &HeapNode<T>) -> Vec<&T> {
         let mut elements = Vec::new();
         let mut stack = Vec::new();
 
@@ -546,23 +545,25 @@ impl<T: Ord> Node<T> {
         }
     }
 
-    fn iterative_consume_in_order_vec(mut root: HeapNode<T>) -> Vec<T> {
-        // let mut elements = Vec::new();
-        // let mut stack = Vec::new();
-        //
-        // while !stack.is_empty() || root.is_some() {
-        //     if root.is_some() {
-        //         stack.push(root.as_ref().unwrap());
-        //         root = root.unwrap().left;
-        //     } else {
-        //         let node = stack.pop();
-        //         elements.push(node.as_ref().unwrap().value);
-        //         root = node.as_ref().unwrap().right;
-        //     }
-        // }
-        //
-        // elements
-        unimplemented!()
+    fn iterative_consume_in_order_vec(root: HeapNode<T>) -> Vec<T> {
+        let mut elements = Vec::new();
+        let mut stack = vec![root];
+
+        while !stack.is_empty() {
+            if let Some(mut current) = stack.pop().unwrap() {
+                if current.left.is_some() {
+                    let left_node = current.left.take();
+                    stack.push(Some(current));
+                    stack.push(left_node);
+                } else {
+                    let right_node = current.right.take();
+                    elements.push(current.value);
+                    stack.push(right_node);
+                }
+            }
+        }
+
+        elements
     }
 
     fn recursive_consume_in_order_vec(node: HeapNode<T>, elements: &mut Vec<T>) {
@@ -571,6 +572,45 @@ impl<T: Ord> Node<T> {
             elements.push(node.value);
             Node::recursive_consume_in_order_vec(node.right, elements);
         }
+    }
+
+    fn iterative_consume_post_order_vec(node: HeapNode<T>) -> Vec<T> {
+        // let mut root = node;
+        // let mut elements = Vec::new();
+        // let mut stack = Vec::new();
+        //
+        // loop {
+        //     while let Some(current) = root {
+        //         if current.right.is_some() {
+        //             stack.push(current.right.as_ref().unwrap());
+        //         }
+        //         stack.push(root.as_ref().unwrap());
+        //         root = current.left;
+        //     }
+        //
+        //     if stack.is_empty() {
+        //         break;
+        //     }
+        //
+        //     if let Some(current) = stack.pop() {
+        //         if !stack.is_empty()
+        //             && current.right.is_some()
+        //             && stack.last().unwrap().value == current.right.as_ref().unwrap().value
+        //         {
+        //             stack.pop();
+        //             stack.push(current);
+        //             root = current.right;
+        //         } else {
+        //             elements.push(current.value);
+        //             root = None;
+        //         }
+        //     } else {
+        //         break;
+        //     }
+        // }
+        //
+        // elements
+        unimplemented!()
     }
 
     fn recursive_consume_post_order_vec(node: HeapNode<T>, elements: &mut Vec<T>) {
@@ -651,9 +691,7 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
     }
 
     fn into_sorted_vec(self) -> Vec<T> {
-        let mut elements = Vec::new();
-        Node::recursive_consume_in_order_vec(self.root, &mut elements);
-        elements
+        Node::iterative_consume_in_order_vec(self.root)
     }
 
     fn pre_order_vec(&self) -> Vec<&T> {
@@ -685,9 +723,7 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
     }
 
     fn into_in_order_iter(self) -> IntoIter<T> {
-        let mut elements = Vec::new();
-        Node::recursive_consume_in_order_vec(self.root, &mut elements);
-        elements.into_iter()
+        Node::iterative_consume_in_order_vec(self.root).into_iter()
     }
 
     fn into_post_order_iter(self) -> IntoIter<T> {

@@ -4,7 +4,7 @@
 //! All elements within the Binary Search Trees _must_ implement the [Ord] trait.
 //!
 //! It is also important to note that [RecursiveBST] is more likely to `blow the stack.`
-//! For more information on why that is the case, please read have a look at
+//! For more information on why that is the case, please have a look at
 //! [The Story of Tail Call Optimizations in Rust.](https://seanchen1991.github.io/posts/tco-story/)
 //!
 //! ## Author Notes

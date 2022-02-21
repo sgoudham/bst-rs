@@ -1,6 +1,6 @@
 use std::vec::IntoIter;
 
-use bst_rs::{BinarySearchTree, IterativeBST, RecursiveBST};
+use bst_rs::{BinarySearchTree, IterativeBST};
 
 #[test]
 fn successfully_insert_elements_into_bst() {

@@ -1,6 +1,6 @@
 use std::vec::IntoIter;
 
-use bst_rs::{BinarySearchTree, IterativeBST};
+use bst_rs::{BinarySearchTree, IterativeBST, RecursiveBST};
 
 #[test]
 fn successfully_insert_elements_into_bst() {
@@ -193,6 +193,21 @@ fn successfully_retrieve_element_as_mut_and_modify_bst() {
 }
 
 #[test]
+fn successfully_get_height_of_bst() {
+    let mut bst = IterativeBST::new();
+    assert_eq!(bst.height(), 0);
+
+    bst.insert(15);
+    bst.insert(10);
+    bst.insert(20);
+    bst.insert(8);
+    bst.insert(12);
+    bst.insert(16);
+    bst.insert(25);
+    assert_eq!(bst.height(), 3);
+}
+
+#[test]
 fn successfully_get_min_from_bst() {
     let mut bst = IterativeBST::new();
     assert_eq!(bst.min(), None);
@@ -350,6 +365,43 @@ fn post_order_iter() {
 }
 
 #[test]
+fn level_order_iter() {
+    let mut bst = IterativeBST::new();
+    bst.insert(15);
+    bst.insert(20);
+    bst.insert(10);
+    bst.insert(8);
+    bst.insert(12);
+    bst.insert(16);
+    bst.insert(25);
+
+    let mut level_order_iter = bst.level_order_iter();
+
+    assert_eq!(level_order_iter.next(), Some(&15));
+    assert_eq!(level_order_iter.next(), Some(&10));
+    assert_eq!(level_order_iter.next(), Some(&20));
+    assert_eq!(level_order_iter.next(), Some(&8));
+    assert_eq!(level_order_iter.next(), Some(&12));
+    assert_eq!(level_order_iter.next(), Some(&16));
+    assert_eq!(level_order_iter.next(), Some(&25));
+    assert_eq!(level_order_iter.next(), None);
+
+    bst.insert(4);
+
+    let mut another_level_order_iter = bst.level_order_iter();
+
+    assert_eq!(another_level_order_iter.next(), Some(&15));
+    assert_eq!(another_level_order_iter.next(), Some(&10));
+    assert_eq!(another_level_order_iter.next(), Some(&20));
+    assert_eq!(another_level_order_iter.next(), Some(&8));
+    assert_eq!(another_level_order_iter.next(), Some(&12));
+    assert_eq!(another_level_order_iter.next(), Some(&16));
+    assert_eq!(another_level_order_iter.next(), Some(&25));
+    assert_eq!(another_level_order_iter.next(), Some(&4));
+    assert_eq!(another_level_order_iter.next(), None);
+}
+
+#[test]
 fn into_pre_order_iter_with_no_elements() {
     let bst: IterativeBST<i32> = IterativeBST::new();
 
@@ -474,6 +526,45 @@ fn into_post_order_iter_with_many_elements() {
 }
 
 #[test]
+fn into_level_order_iter_with_no_elements() {
+    let bst: IterativeBST<i32> = IterativeBST::new();
+
+    let mut level_order_traversal = bst.into_level_order_iter();
+
+    assert_eq!(level_order_traversal.next(), None);
+}
+
+#[test]
+fn into_level_order_iter_with_one_element() {
+    let mut bst = IterativeBST::new();
+    bst.insert(3);
+
+    let mut level_order_traversal = bst.into_level_order_iter();
+
+    assert_eq!(level_order_traversal.next(), Some(3));
+    assert_eq!(level_order_traversal.next(), None);
+}
+
+#[test]
+fn into_level_order_iter_with_many_elements() {
+    let mut bst = IterativeBST::new();
+    bst.insert(3);
+    bst.insert(5);
+    bst.insert(4);
+    bst.insert(1);
+    bst.insert(2);
+
+    let mut level_order_traversal = bst.into_level_order_iter();
+
+    assert_eq!(level_order_traversal.next(), Some(3));
+    assert_eq!(level_order_traversal.next(), Some(1));
+    assert_eq!(level_order_traversal.next(), Some(5));
+    assert_eq!(level_order_traversal.next(), Some(2));
+    assert_eq!(level_order_traversal.next(), Some(4));
+    assert_eq!(level_order_traversal.next(), None);
+}
+
+#[test]
 fn successfully_get_sorted_vec() {
     let bst: IterativeBST<i32> = IterativeBST::new();
     assert!(bst.sorted_vec().is_empty());
@@ -540,6 +631,22 @@ fn successfully_get_post_order_vec() {
     bst.insert(2);
 
     assert_eq!(bst.post_order_vec(), vec![&2, &1, &5, &4, &3]);
+}
+
+#[test]
+fn successfully_get_level_order_vec() {
+    let mut bst = IterativeBST::new();
+    assert!(bst.level_order_vec().is_empty());
+
+    bst.insert(15);
+    bst.insert(20);
+    bst.insert(10);
+    bst.insert(8);
+    bst.insert(12);
+    bst.insert(16);
+    bst.insert(25);
+
+    assert_eq!(bst.level_order_vec(), vec![&15, &10, &20, &8, &12, &16, &25]);
 }
 
 #[test]

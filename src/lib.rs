@@ -1,5 +1,4 @@
-//! This crate contains Recursive & Iterative Binary Search Tree Implementations. All common
-//! operations are included along with common traversal iterators.
+//! This crate contains Recursive & Iterative Binary Search Tree Implementations. All common operations are included along with common traversal iterators.
 //!
 //! All elements within the Binary Search Trees _must_ implement the [Ord] trait.
 //!
@@ -81,7 +80,8 @@
 //! assert_ne!(recursive_bst, RecursiveBST::new());
 //! ```
 
-use std::cmp::Ordering;
+use std::cmp::{max, Ordering};
+use std::collections::VecDeque;
 use std::fmt::{Debug, Display, Formatter};
 use std::vec::IntoIter;
 
@@ -113,6 +113,16 @@ use std::vec::IntoIter;
 /// assert_eq!(bst_from_vec.in_order_vec(), vec![&2, &5, &10, &15, &18]);
 /// assert_eq!(bst_from_vec.sorted_vec(), vec![&2, &5, &10, &15, &18]);
 pub trait BinarySearchTree<T: Ord> {
+    /// Create an empty Binary Search Tree
+    ///
+    /// No nodes are allocated on the heap yet
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use bst_rs::IterativeBST;
+    ///
+    /// let mut bst = IterativeBST::new();
     fn new() -> Self;
     fn size(&self) -> usize;
     fn is_empty(&self) -> bool;
@@ -122,6 +132,7 @@ pub trait BinarySearchTree<T: Ord> {
     fn remove(&mut self, value: &T);
     fn retrieve(&self, value: &T) -> Option<&T>;
     fn retrieve_as_mut(&mut self, value: &T) -> Option<&mut T>;
+    fn height(&self) -> usize;
     fn min(&self) -> Option<&T>;
     fn max(&self) -> Option<&T>;
     fn remove_min(&mut self) -> Option<T>;
@@ -131,12 +142,15 @@ pub trait BinarySearchTree<T: Ord> {
     fn pre_order_vec(&self) -> Vec<&T>;
     fn in_order_vec(&self) -> Vec<&T>;
     fn post_order_vec(&self) -> Vec<&T>;
+    fn level_order_vec(&self) -> Vec<&T>;
     fn pre_order_iter(&self) -> IntoIter<&T>;
     fn in_order_iter(&self) -> IntoIter<&T>;
     fn post_order_iter(&self) -> IntoIter<&T>;
+    fn level_order_iter(&self) -> IntoIter<&T>;
     fn into_pre_order_iter(self) -> IntoIter<T>;
     fn into_in_order_iter(self) -> IntoIter<T>;
     fn into_post_order_iter(self) -> IntoIter<T>;
+    fn into_level_order_iter(self) -> IntoIter<T>;
 }
 
 type HeapNode<T> = Option<Box<Node<T>>>;
@@ -324,6 +338,13 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
         Node::iterative_retrieve_as_mut(&mut self.root, value)
     }
 
+    fn height(&self) -> usize {
+        match self.root {
+            None => 0,
+            Some(_) => Node::iterative_height(&self.root),
+        }
+    }
+
     fn min(&self) -> Option<&T> {
         Node::iterative_min(&self.root)
     }
@@ -368,6 +389,10 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
         Node::iterative_post_order_vec(&self.root)
     }
 
+    fn level_order_vec(&self) -> Vec<&T> {
+        Node::iterative_level_order_vec(&self.root)
+    }
+
     fn pre_order_iter(&self) -> IntoIter<&T> {
         Node::iterative_pre_order_vec(&self.root).into_iter()
     }
@@ -380,6 +405,10 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
         Node::iterative_post_order_vec(&self.root).into_iter()
     }
 
+    fn level_order_iter(&self) -> IntoIter<&T> {
+        Node::iterative_level_order_vec(&self.root).into_iter()
+    }
+
     fn into_pre_order_iter(self) -> IntoIter<T> {
         Node::iterative_consume_pre_order_vec(self.root).into_iter()
     }
@@ -390,6 +419,10 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
 
     fn into_post_order_iter(self) -> IntoIter<T> {
         Node::iterative_consume_post_order_vec(self.root).into_iter()
+    }
+
+    fn into_level_order_iter(self) -> IntoIter<T> {
+        Node::iterative_consume_level_order_vec(self.root).into_iter()
     }
 }
 
@@ -451,6 +484,13 @@ impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
         match self.root {
             None => None,
             Some(ref mut node) => node.recursive_retrieve_as_mut(value),
+        }
+    }
+
+    fn height(&self) -> usize {
+        match self.root {
+            None => 0,
+            Some(_) => Node::recursive_height(&self.root),
         }
     }
 
@@ -524,6 +564,12 @@ impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
         elements
     }
 
+    fn level_order_vec(&self) -> Vec<&T> {
+        let mut elements: Vec<&T> = Vec::new();
+        Node::recursive_level_order_vec(&self.root, &mut elements);
+        elements
+    }
+
     fn pre_order_iter(&self) -> IntoIter<&T> {
         let mut elements: Vec<&T> = Vec::new();
         Node::recursive_pre_order_vec(&self.root, &mut elements);
@@ -542,6 +588,12 @@ impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
         elements.into_iter()
     }
 
+    fn level_order_iter(&self) -> IntoIter<&T> {
+        let mut elements: Vec<&T> = Vec::new();
+        Node::recursive_level_order_vec(&self.root, &mut elements);
+        elements.into_iter()
+    }
+
     fn into_pre_order_iter(self) -> IntoIter<T> {
         let mut elements = Vec::new();
         Node::recursive_consume_pre_order_vec(self.root, &mut elements);
@@ -557,6 +609,12 @@ impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
     fn into_post_order_iter(self) -> IntoIter<T> {
         let mut elements = Vec::new();
         Node::recursive_consume_post_order_vec(self.root, &mut elements);
+        elements.into_iter()
+    }
+
+    fn into_level_order_iter(self) -> IntoIter<T> {
+        let mut elements = Vec::new();
+        Node::recursive_consume_level_order_vec(self.root, &mut elements);
         elements.into_iter()
     }
 }
@@ -681,6 +739,41 @@ impl<T: Ord> Node<T> {
                 None => None,
                 Some(ref mut node) => node.recursive_retrieve_as_mut(value),
             },
+        }
+    }
+
+    fn iterative_height(root: &HeapNode<T>) -> usize {
+        let mut height = 0;
+        let mut queue = VecDeque::new();
+        queue.push_front(root);
+
+        while !queue.is_empty() {
+            let mut size = queue.len();
+            while size > 0 {
+                let current = queue.pop_front().as_ref().unwrap().as_ref().unwrap();
+                if current.left.is_some() {
+                    queue.push_back(&current.left);
+                }
+                if current.right.is_some() {
+                    queue.push_back(&current.right);
+                }
+                size -= 1;
+            }
+            height += 1;
+        }
+
+        height
+    }
+
+    fn recursive_height(root: &HeapNode<T>) -> usize {
+        match root {
+            None => 0,
+            Some(node) => {
+                1 + max(
+                    Node::recursive_height(&node.left),
+                    Node::recursive_height(&node.right),
+                )
+            }
         }
     }
 
@@ -896,6 +989,52 @@ impl<T: Ord> Node<T> {
         }
     }
 
+    fn iterative_level_order_vec(root: &HeapNode<T>) -> Vec<&T> {
+        let mut elements = Vec::new();
+        let mut deque = VecDeque::new();
+        deque.push_front(root.as_ref());
+
+        while let Some(current) = deque.pop_front().unwrap_or(None) {
+            elements.push(&current.value);
+            if current.left.is_some() {
+                deque.push_back(current.left.as_ref());
+            }
+            if current.right.is_some() {
+                deque.push_back(current.right.as_ref());
+            }
+        }
+
+        elements
+    }
+
+    fn recursive_level_order_vec<'a>(root: &'a HeapNode<T>, elements: &mut Vec<&'a T>) {
+        let height = Node::recursive_height(root);
+        for i in 1..=height {
+            Node::recursive_current_level(root, elements, i);
+        }
+    }
+
+    fn recursive_current_level<'a>(root: &'a HeapNode<T>, elements: &mut Vec<&'a T>, level: usize) {
+        if root.is_some() {
+            match level.cmp(&1) {
+                Ordering::Less => {}
+                Ordering::Equal => elements.push(&root.as_ref().unwrap().value),
+                Ordering::Greater => {
+                    Node::recursive_current_level(
+                        &root.as_ref().unwrap().left,
+                        elements,
+                        level - 1,
+                    );
+                    Node::recursive_current_level(
+                        &root.as_ref().unwrap().right,
+                        elements,
+                        level - 1,
+                    );
+                }
+            }
+        }
+    }
+
     fn iterative_consume_pre_order_vec(node: HeapNode<T>) -> Vec<T> {
         let mut elements = Vec::new();
         let mut stack = vec![node];
@@ -977,6 +1116,46 @@ impl<T: Ord> Node<T> {
             Node::recursive_consume_post_order_vec(node.left, elements);
             Node::recursive_consume_post_order_vec(node.right, elements);
             elements.push(node.value);
+        }
+    }
+
+    fn iterative_consume_level_order_vec(root: HeapNode<T>) -> Vec<T> {
+        let mut elements = Vec::new();
+        let mut deque = VecDeque::new();
+        deque.push_front(root);
+
+        while let Some(current) = deque.pop_front().unwrap_or(None) {
+            elements.push(current.value);
+            if current.left.is_some() {
+                deque.push_back(current.left);
+            }
+            if current.right.is_some() {
+                deque.push_back(current.right);
+            }
+        }
+
+        elements
+    }
+
+    fn recursive_consume_level_order_vec(mut root: HeapNode<T>, elements: &mut Vec<T>) {
+        let height = Node::recursive_height(&root);
+        for i in 1..=height {
+            Node::recursive_consume_current_level(&mut root, elements, i);
+        }
+    }
+
+    fn recursive_consume_current_level(root: &mut HeapNode<T>, elements: &mut Vec<T>, level: usize) {
+        if let Some(..) = root {
+            match level.cmp(&1) {
+                Ordering::Less => {}
+                Ordering::Equal => elements.push(root.as_mut().unwrap().value),
+                Ordering::Greater => {
+                    if let Some(node) = root {
+                        Node::recursive_consume_current_level(&mut node.left, elements, level - 1);
+                        Node::recursive_consume_current_level(&mut node.right, elements, level - 1);
+                    }
+                }
+            }
         }
     }
 }

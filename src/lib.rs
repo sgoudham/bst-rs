@@ -122,7 +122,7 @@ pub trait BinarySearchTree<T: Ord> {
     /// ```rust
     /// use bst_rs::{BinarySearchTree, IterativeBST};
     ///
-    /// let mut bst = IterativeBST::new();
+    /// let mut bst: IterativeBST<i32> = IterativeBST::new();
     /// assert!(bst.is_empty())
     fn new() -> Self;
 

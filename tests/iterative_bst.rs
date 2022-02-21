@@ -31,6 +31,15 @@ fn check_if_bst_is_empty() {
 }
 
 #[test]
+fn check_if_bst_is_not_empty() {
+    let mut bst = IterativeBST::new();
+    assert!(!bst.is_not_empty());
+
+    bst.insert(1);
+    assert!(bst.is_not_empty());
+}
+
+#[test]
 fn check_if_bst_contains_elements() {
     let mut bst = IterativeBST::new();
     assert!(!bst.contains(&10));

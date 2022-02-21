@@ -116,6 +116,7 @@ pub trait BinarySearchTree<T: Ord> {
     fn new() -> Self;
     fn size(&self) -> usize;
     fn is_empty(&self) -> bool;
+    fn is_not_empty(&self) -> bool;
     fn insert(&mut self, value: T);
     fn contains(&self, value: &T) -> bool;
     fn remove(&mut self, value: &T);
@@ -157,6 +158,66 @@ struct Node<T: Ord> {
     value: T,
     left: HeapNode<T>,
     right: HeapNode<T>,
+}
+
+impl<T: Ord> PartialEq for IterativeBST<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.sorted_vec() == other.sorted_vec()
+    }
+}
+
+impl<T: Ord> Extend<T> for IterativeBST<T> {
+    fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
+        for value in iter.into_iter() {
+            self.insert(value)
+        }
+    }
+}
+
+impl<T: Ord> FromIterator<T> for IterativeBST<T> {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        let mut bst = IterativeBST::new();
+        bst.extend(iter);
+        bst
+    }
+}
+
+impl<T: Ord> From<Vec<T>> for IterativeBST<T> {
+    fn from(vec: Vec<T>) -> Self {
+        let mut bst = IterativeBST::new();
+        for value in vec.into_iter() {
+            bst.insert(value);
+        }
+        bst
+    }
+}
+
+impl<T: Ord + Clone> From<&[T]> for IterativeBST<T> {
+    fn from(slice: &[T]) -> Self {
+        let mut bst = IterativeBST::new();
+        for value in slice {
+            bst.insert((*value).clone());
+        }
+        bst
+    }
+}
+
+impl<T: Ord + Clone> Clone for IterativeBST<T> {
+    fn clone(&self) -> Self {
+        let mut bst = IterativeBST::new();
+
+        for value in self.in_order_iter() {
+            bst.insert((*value).clone());
+        }
+
+        bst
+    }
+}
+
+impl<T: Ord + Debug> Display for IterativeBST<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.sorted_vec())
+    }
 }
 
 impl<T: Ord> PartialEq for RecursiveBST<T> {
@@ -219,63 +280,284 @@ impl<T: Ord + Debug> Display for RecursiveBST<T> {
     }
 }
 
-impl<T: Ord> PartialEq for IterativeBST<T> {
-    fn eq(&self, other: &Self) -> bool {
-        self.sorted_vec() == other.sorted_vec()
-    }
-}
-
-impl<T: Ord> Extend<T> for IterativeBST<T> {
-    fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
-        for value in iter.into_iter() {
-            self.insert(value)
+impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
+    fn new() -> IterativeBST<T> {
+        IterativeBST {
+            root: None,
+            size: 0,
         }
     }
-}
 
-impl<T: Ord> FromIterator<T> for IterativeBST<T> {
-    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
-        let mut bst = IterativeBST::new();
-        bst.extend(iter);
-        bst
+    fn size(&self) -> usize {
+        self.size
     }
-}
 
-impl<T: Ord> From<Vec<T>> for IterativeBST<T> {
-    fn from(vec: Vec<T>) -> Self {
-        let mut bst = IterativeBST::new();
-        for value in vec.into_iter() {
-            bst.insert(value);
+    fn is_empty(&self) -> bool {
+        self.size == 0
+    }
+
+    fn is_not_empty(&self) -> bool {
+        self.size != 0
+    }
+
+    fn insert(&mut self, value: T) {
+        if Node::iterative_insert(&mut self.root, value).is_ok() {
+            self.size += 1;
         }
-        bst
     }
-}
 
-impl<T: Ord + Clone> From<&[T]> for IterativeBST<T> {
-    fn from(slice: &[T]) -> Self {
-        let mut bst = IterativeBST::new();
-        for value in slice {
-            bst.insert((*value).clone());
+    fn contains(&self, value: &T) -> bool {
+        Node::iterative_contains(&self.root, value)
+    }
+
+    fn remove(&mut self, value: &T) {
+        if Node::iterative_remove(&mut self.root, value).is_ok() {
+            self.size -= 1;
         }
-        bst
+    }
+
+    fn retrieve(&self, value: &T) -> Option<&T> {
+        Node::iterative_retrieve(&self.root, value)
+    }
+
+    fn retrieve_as_mut(&mut self, value: &T) -> Option<&mut T> {
+        Node::iterative_retrieve_as_mut(&mut self.root, value)
+    }
+
+    fn min(&self) -> Option<&T> {
+        Node::iterative_min(&self.root)
+    }
+
+    fn max(&self) -> Option<&T> {
+        Node::iterative_max(&self.root)
+    }
+
+    fn remove_min(&mut self) -> Option<T> {
+        let removed_min = Node::iterative_remove_min(&mut self.root);
+        if removed_min.is_some() {
+            self.size -= 1;
+        }
+        removed_min
+    }
+
+    fn remove_max(&mut self) -> Option<T> {
+        let removed_max = Node::iterative_remove_max(&mut self.root);
+        if removed_max.is_some() {
+            self.size -= 1;
+        }
+        removed_max
+    }
+
+    fn sorted_vec(&self) -> Vec<&T> {
+        Node::iterative_in_order_vec(&self.root)
+    }
+
+    fn into_sorted_vec(self) -> Vec<T> {
+        Node::iterative_consume_in_order_vec(self.root)
+    }
+
+    fn pre_order_vec(&self) -> Vec<&T> {
+        Node::iterative_pre_order_vec(&self.root)
+    }
+
+    fn in_order_vec(&self) -> Vec<&T> {
+        Node::iterative_in_order_vec(&self.root)
+    }
+
+    fn post_order_vec(&self) -> Vec<&T> {
+        Node::iterative_post_order_vec(&self.root)
+    }
+
+    fn pre_order_iter(&self) -> IntoIter<&T> {
+        Node::iterative_pre_order_vec(&self.root).into_iter()
+    }
+
+    fn in_order_iter(&self) -> IntoIter<&T> {
+        Node::iterative_in_order_vec(&self.root).into_iter()
+    }
+
+    fn post_order_iter(&self) -> IntoIter<&T> {
+        Node::iterative_post_order_vec(&self.root).into_iter()
+    }
+
+    fn into_pre_order_iter(self) -> IntoIter<T> {
+        Node::iterative_consume_pre_order_vec(self.root).into_iter()
+    }
+
+    fn into_in_order_iter(self) -> IntoIter<T> {
+        Node::iterative_consume_in_order_vec(self.root).into_iter()
+    }
+
+    fn into_post_order_iter(self) -> IntoIter<T> {
+        Node::iterative_consume_post_order_vec(self.root).into_iter()
     }
 }
 
-impl<T: Ord + Clone> Clone for IterativeBST<T> {
-    fn clone(&self) -> Self {
-        let mut bst = IterativeBST::new();
+impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
+    fn new() -> RecursiveBST<T> {
+        RecursiveBST {
+            root: None,
+            size: 0,
+        }
+    }
 
-        for value in self.in_order_iter() {
-            bst.insert((*value).clone());
+    fn size(&self) -> usize {
+        self.size
+    }
+
+    fn is_empty(&self) -> bool {
+        self.size == 0
+    }
+
+    fn is_not_empty(&self) -> bool {
+        self.size != 0
+    }
+
+    fn insert(&mut self, value: T) {
+        match self.root {
+            None => {
+                self.root = Some(Box::from(Node::new(value)));
+                self.size += 1;
+            }
+            Some(ref mut node) => {
+                if node.recursive_insert(value).is_ok() {
+                    self.size += 1;
+                }
+            }
+        }
+    }
+
+    fn contains(&self, value: &T) -> bool {
+        match self.root {
+            None => false,
+            Some(ref node) => node.recursive_contains(value),
+        }
+    }
+
+    fn remove(&mut self, value: &T) {
+        if Node::recursive_remove(&mut self.root, value).is_ok() {
+            self.size -= 1;
+        }
+    }
+
+    fn retrieve(&self, value: &T) -> Option<&T> {
+        match self.root {
+            None => None,
+            Some(ref node) => node.recursive_retrieve(value),
+        }
+    }
+
+    fn retrieve_as_mut(&mut self, value: &T) -> Option<&mut T> {
+        match self.root {
+            None => None,
+            Some(ref mut node) => node.recursive_retrieve_as_mut(value),
+        }
+    }
+
+    fn min(&self) -> Option<&T> {
+        match self.root {
+            None => None,
+            Some(ref node) => node.recursive_min(),
+        }
+    }
+
+    fn max(&self) -> Option<&T> {
+        match self.root {
+            None => None,
+            Some(ref node) => node.recursive_max(),
+        }
+    }
+
+    fn remove_min(&mut self) -> Option<T> {
+        let removed_min = match self.root {
+            None => None,
+            Some(_) => Node::recursive_remove_min(&mut self.root),
+        };
+
+        if removed_min.is_some() {
+            self.size -= 1;
         }
 
-        bst
+        removed_min
     }
-}
 
-impl<T: Ord + Debug> Display for IterativeBST<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.sorted_vec())
+    fn remove_max(&mut self) -> Option<T> {
+        let removed_max = match self.root {
+            None => None,
+            Some(_) => Node::recursive_remove_max(&mut self.root),
+        };
+
+        if removed_max.is_some() {
+            self.size -= 1;
+        }
+
+        removed_max
+    }
+
+    fn sorted_vec(&self) -> Vec<&T> {
+        let mut elements: Vec<&T> = Vec::new();
+        Node::recursive_in_order_vec(&self.root, &mut elements);
+        elements
+    }
+
+    fn into_sorted_vec(self) -> Vec<T> {
+        let mut elements = Vec::new();
+        Node::recursive_consume_in_order_vec(self.root, &mut elements);
+        elements
+    }
+
+    fn pre_order_vec(&self) -> Vec<&T> {
+        let mut elements: Vec<&T> = Vec::new();
+        Node::recursive_pre_order_vec(&self.root, &mut elements);
+        elements
+    }
+
+    fn in_order_vec(&self) -> Vec<&T> {
+        let mut elements: Vec<&T> = Vec::new();
+        Node::recursive_in_order_vec(&self.root, &mut elements);
+        elements
+    }
+
+    fn post_order_vec(&self) -> Vec<&T> {
+        let mut elements: Vec<&T> = Vec::new();
+        Node::recursive_post_order_vec(&self.root, &mut elements);
+        elements
+    }
+
+    fn pre_order_iter(&self) -> IntoIter<&T> {
+        let mut elements: Vec<&T> = Vec::new();
+        Node::recursive_pre_order_vec(&self.root, &mut elements);
+        elements.into_iter()
+    }
+
+    fn in_order_iter(&self) -> IntoIter<&T> {
+        let mut elements: Vec<&T> = Vec::new();
+        Node::recursive_in_order_vec(&self.root, &mut elements);
+        elements.into_iter()
+    }
+
+    fn post_order_iter(&self) -> IntoIter<&T> {
+        let mut elements: Vec<&T> = Vec::new();
+        Node::recursive_post_order_vec(&self.root, &mut elements);
+        elements.into_iter()
+    }
+
+    fn into_pre_order_iter(self) -> IntoIter<T> {
+        let mut elements = Vec::new();
+        Node::recursive_consume_pre_order_vec(self.root, &mut elements);
+        elements.into_iter()
+    }
+
+    fn into_in_order_iter(self) -> IntoIter<T> {
+        let mut elements = Vec::new();
+        Node::recursive_consume_in_order_vec(self.root, &mut elements);
+        elements.into_iter()
+    }
+
+    fn into_post_order_iter(self) -> IntoIter<T> {
+        let mut elements = Vec::new();
+        Node::recursive_consume_post_order_vec(self.root, &mut elements);
+        elements.into_iter()
     }
 }
 
@@ -696,278 +978,5 @@ impl<T: Ord> Node<T> {
             Node::recursive_consume_post_order_vec(node.right, elements);
             elements.push(node.value);
         }
-    }
-}
-
-impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
-    fn new() -> IterativeBST<T> {
-        IterativeBST {
-            root: None,
-            size: 0,
-        }
-    }
-
-    fn size(&self) -> usize {
-        self.size
-    }
-
-    fn is_empty(&self) -> bool {
-        self.size == 0
-    }
-
-    fn insert(&mut self, value: T) {
-        if Node::iterative_insert(&mut self.root, value).is_ok() {
-            self.size += 1;
-        }
-    }
-
-    fn contains(&self, value: &T) -> bool {
-        Node::iterative_contains(&self.root, value)
-    }
-
-    fn remove(&mut self, value: &T) {
-        if Node::iterative_remove(&mut self.root, value).is_ok() {
-            self.size -= 1;
-        }
-    }
-
-    fn retrieve(&self, value: &T) -> Option<&T> {
-        Node::iterative_retrieve(&self.root, value)
-    }
-
-    fn retrieve_as_mut(&mut self, value: &T) -> Option<&mut T> {
-        Node::iterative_retrieve_as_mut(&mut self.root, value)
-    }
-
-    fn min(&self) -> Option<&T> {
-        Node::iterative_min(&self.root)
-    }
-
-    fn max(&self) -> Option<&T> {
-        Node::iterative_max(&self.root)
-    }
-
-    fn remove_min(&mut self) -> Option<T> {
-        let removed_min = Node::iterative_remove_min(&mut self.root);
-        if removed_min.is_some() {
-            self.size -= 1;
-        }
-        removed_min
-    }
-
-    fn remove_max(&mut self) -> Option<T> {
-        let removed_max = Node::iterative_remove_max(&mut self.root);
-        if removed_max.is_some() {
-            self.size -= 1;
-        }
-        removed_max
-    }
-
-    fn sorted_vec(&self) -> Vec<&T> {
-        Node::iterative_in_order_vec(&self.root)
-    }
-
-    fn into_sorted_vec(self) -> Vec<T> {
-        Node::iterative_consume_in_order_vec(self.root)
-    }
-
-    fn pre_order_vec(&self) -> Vec<&T> {
-        Node::iterative_pre_order_vec(&self.root)
-    }
-
-    fn in_order_vec(&self) -> Vec<&T> {
-        Node::iterative_in_order_vec(&self.root)
-    }
-
-    fn post_order_vec(&self) -> Vec<&T> {
-        Node::iterative_post_order_vec(&self.root)
-    }
-
-    fn pre_order_iter(&self) -> IntoIter<&T> {
-        Node::iterative_pre_order_vec(&self.root).into_iter()
-    }
-
-    fn in_order_iter(&self) -> IntoIter<&T> {
-        Node::iterative_in_order_vec(&self.root).into_iter()
-    }
-
-    fn post_order_iter(&self) -> IntoIter<&T> {
-        Node::iterative_post_order_vec(&self.root).into_iter()
-    }
-
-    fn into_pre_order_iter(self) -> IntoIter<T> {
-        Node::iterative_consume_pre_order_vec(self.root).into_iter()
-    }
-
-    fn into_in_order_iter(self) -> IntoIter<T> {
-        Node::iterative_consume_in_order_vec(self.root).into_iter()
-    }
-
-    fn into_post_order_iter(self) -> IntoIter<T> {
-        Node::iterative_consume_post_order_vec(self.root).into_iter()
-    }
-}
-
-impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
-    fn new() -> RecursiveBST<T> {
-        RecursiveBST {
-            root: None,
-            size: 0,
-        }
-    }
-
-    fn size(&self) -> usize {
-        self.size
-    }
-
-    fn is_empty(&self) -> bool {
-        self.size == 0
-    }
-
-    fn insert(&mut self, value: T) {
-        match self.root {
-            None => {
-                self.root = Some(Box::from(Node::new(value)));
-                self.size += 1;
-            }
-            Some(ref mut node) => {
-                if node.recursive_insert(value).is_ok() {
-                    self.size += 1;
-                }
-            }
-        }
-    }
-
-    fn contains(&self, value: &T) -> bool {
-        match self.root {
-            None => false,
-            Some(ref node) => node.recursive_contains(value),
-        }
-    }
-
-    fn remove(&mut self, value: &T) {
-        if Node::recursive_remove(&mut self.root, value).is_ok() {
-            self.size -= 1;
-        }
-    }
-
-    fn retrieve(&self, value: &T) -> Option<&T> {
-        match self.root {
-            None => None,
-            Some(ref node) => node.recursive_retrieve(value),
-        }
-    }
-
-    fn retrieve_as_mut(&mut self, value: &T) -> Option<&mut T> {
-        match self.root {
-            None => None,
-            Some(ref mut node) => node.recursive_retrieve_as_mut(value),
-        }
-    }
-
-    fn min(&self) -> Option<&T> {
-        match self.root {
-            None => None,
-            Some(ref node) => node.recursive_min(),
-        }
-    }
-
-    fn max(&self) -> Option<&T> {
-        match self.root {
-            None => None,
-            Some(ref node) => node.recursive_max(),
-        }
-    }
-
-    fn remove_min(&mut self) -> Option<T> {
-        let removed_min = match self.root {
-            None => None,
-            Some(_) => Node::recursive_remove_min(&mut self.root),
-        };
-
-        if removed_min.is_some() {
-            self.size -= 1;
-        }
-
-        removed_min
-    }
-
-    fn remove_max(&mut self) -> Option<T> {
-        let removed_max = match self.root {
-            None => None,
-            Some(_) => Node::recursive_remove_max(&mut self.root),
-        };
-
-        if removed_max.is_some() {
-            self.size -= 1;
-        }
-
-        removed_max
-    }
-
-    fn sorted_vec(&self) -> Vec<&T> {
-        let mut elements: Vec<&T> = Vec::new();
-        Node::recursive_in_order_vec(&self.root, &mut elements);
-        elements
-    }
-
-    fn into_sorted_vec(self) -> Vec<T> {
-        let mut elements = Vec::new();
-        Node::recursive_consume_in_order_vec(self.root, &mut elements);
-        elements
-    }
-
-    fn pre_order_vec(&self) -> Vec<&T> {
-        let mut elements: Vec<&T> = Vec::new();
-        Node::recursive_pre_order_vec(&self.root, &mut elements);
-        elements
-    }
-
-    fn in_order_vec(&self) -> Vec<&T> {
-        let mut elements: Vec<&T> = Vec::new();
-        Node::recursive_in_order_vec(&self.root, &mut elements);
-        elements
-    }
-
-    fn post_order_vec(&self) -> Vec<&T> {
-        let mut elements: Vec<&T> = Vec::new();
-        Node::recursive_post_order_vec(&self.root, &mut elements);
-        elements
-    }
-
-    fn pre_order_iter(&self) -> IntoIter<&T> {
-        let mut elements: Vec<&T> = Vec::new();
-        Node::recursive_pre_order_vec(&self.root, &mut elements);
-        elements.into_iter()
-    }
-
-    fn in_order_iter(&self) -> IntoIter<&T> {
-        let mut elements: Vec<&T> = Vec::new();
-        Node::recursive_in_order_vec(&self.root, &mut elements);
-        elements.into_iter()
-    }
-
-    fn post_order_iter(&self) -> IntoIter<&T> {
-        let mut elements: Vec<&T> = Vec::new();
-        Node::recursive_post_order_vec(&self.root, &mut elements);
-        elements.into_iter()
-    }
-
-    fn into_pre_order_iter(self) -> IntoIter<T> {
-        let mut elements = Vec::new();
-        Node::recursive_consume_pre_order_vec(self.root, &mut elements);
-        elements.into_iter()
-    }
-
-    fn into_in_order_iter(self) -> IntoIter<T> {
-        let mut elements = Vec::new();
-        Node::recursive_consume_in_order_vec(self.root, &mut elements);
-        elements.into_iter()
-    }
-
-    fn into_post_order_iter(self) -> IntoIter<T> {
-        let mut elements = Vec::new();
-        Node::recursive_consume_post_order_vec(self.root, &mut elements);
-        elements.into_iter()
     }
 }

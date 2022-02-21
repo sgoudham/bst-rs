@@ -696,7 +696,7 @@ impl<T: Ord> Node<T> {
                         (None, Some(_)) => *root = current.right.take(),
                         (Some(_), Some(_)) => {
                             root.as_mut().unwrap().value =
-                                Node::recursive_remove_min(&mut current.right).unwrap()
+                                Node::iterative_remove_min(&mut current.right).unwrap()
                         }
                     }
 

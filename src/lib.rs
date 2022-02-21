@@ -120,10 +120,12 @@ pub trait BinarySearchTree<T: Ord> {
     /// # Examples
     ///
     /// ```rust
-    /// use bst_rs::IterativeBST;
+    /// use bst_rs::{BinarySearchTree, IterativeBST};
     ///
     /// let mut bst = IterativeBST::new();
+    /// assert!(bst.is_empty())
     fn new() -> Self;
+
     fn size(&self) -> usize;
     fn is_empty(&self) -> bool;
     fn is_not_empty(&self) -> bool;
@@ -1137,25 +1139,42 @@ impl<T: Ord> Node<T> {
         elements
     }
 
-    fn recursive_consume_level_order_vec(mut root: HeapNode<T>, elements: &mut Vec<T>) {
+    fn recursive_consume_level_order_vec(root: HeapNode<T>, elements: &mut Vec<T>) {
         let height = Node::recursive_height(&root);
-        for i in 1..=height {
-            Node::recursive_consume_current_level(&mut root, elements, i);
+        for i in 0..height {
+            // SAFETY: this is sound because dealloc_boxes ensures that the elements don't
+            // get dropped again
+            unsafe { Node::write_level_into_vec(&root, elements, i) };
+        }
+        Node::dealloc_boxes(root);
+    }
+
+    /// # Safety
+    ///
+    /// The caller must ensure that the values contained in the heap are not dropped again.
+    ///
+    /// Otherwise this could lead to a double free.
+    unsafe fn write_level_into_vec(root: &HeapNode<T>, elements: &mut Vec<T>, level: usize) {
+        if let Some(node) = root {
+            if level == 0 {
+                // "move" the value without actually moving
+                let element = std::ptr::read(&node.value);
+                elements.push(element);
+            } else {
+                Node::write_level_into_vec(&node.left, elements, level - 1);
+                Node::write_level_into_vec(&node.right, elements, level - 1);
+            }
         }
     }
 
-    fn recursive_consume_current_level(root: &mut HeapNode<T>, elements: &mut Vec<T>, level: usize) {
-        if let Some(..) = root {
-            match level.cmp(&1) {
-                Ordering::Less => {}
-                Ordering::Equal => elements.push(root.as_mut().unwrap().value),
-                Ordering::Greater => {
-                    if let Some(node) = root {
-                        Node::recursive_consume_current_level(&mut node.left, elements, level - 1);
-                        Node::recursive_consume_current_level(&mut node.right, elements, level - 1);
-                    }
-                }
-            }
+    fn dealloc_boxes(root: HeapNode<T>) {
+        if let Some(node) = root {
+            // move out of the box by de-referencing to drop it and destructure the `Node`
+            let Node { value, left, right } = *node;
+            // ensure that the value is not dropped again by forgetting it
+            std::mem::forget(value);
+            Node::dealloc_boxes(left);
+            Node::dealloc_boxes(right);
         }
     }
 }

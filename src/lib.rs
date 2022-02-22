@@ -177,9 +177,9 @@ pub trait BinarySearchTree<T: Ord> {
     /// or `None` if element does not exist.
     fn retrieve_as_mut(&mut self, value: &T) -> Option<&mut T>;
 
-    /// Returns the **height.**
+    /// Returns the **height** or `None` if tree is empty.
     ///
-    /// This is the number of edges between the root and it's furthest leaf node.
+    /// The height is the number of edges between the root and it's furthest leaf node.
     ///
     /// # Example
     ///
@@ -393,10 +393,9 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
     }
 
     fn height(&self) -> Option<isize> {
-        match self.root {
-            None => None,
-            Some(_) => Some(Node::iterative_height(&self.root)),
-        }
+        self.root
+            .as_ref()
+            .map(|_| Node::iterative_height(&self.root))
     }
 
     fn min(&self) -> Option<&T> {

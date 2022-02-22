@@ -195,16 +195,21 @@ fn successfully_retrieve_element_as_mut_and_modify_bst() {
 #[test]
 fn successfully_get_height_of_bst() {
     let mut bst = IterativeBST::new();
-    assert_eq!(bst.height(), 0);
+    assert_eq!(bst.height(), None);
 
-    bst.insert(15);
-    bst.insert(10);
-    bst.insert(20);
+    bst.insert(4);
+    assert_eq!(bst.height(), Some(0));
+
+    bst.insert(2);
+    bst.insert(6);
+    bst.insert(1);
+    bst.insert(3);
+    bst.insert(4);
+    bst.insert(7);
+    assert_eq!(bst.height(), Some(2));
+
     bst.insert(8);
-    bst.insert(12);
-    bst.insert(16);
-    bst.insert(25);
-    assert_eq!(bst.height(), 3);
+    assert_eq!(bst.height(), Some(3));
 }
 
 #[test]

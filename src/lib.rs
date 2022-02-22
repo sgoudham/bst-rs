@@ -88,50 +88,114 @@ use std::vec::IntoIter;
 /// A trait containing all the common operations of Binary Search Trees.
 ///
 /// # Examples
-/// _Examples are extended from crate level "Quick Start"_
+/// Examples are extended from crate level "Quick Start"
 ///
 /// ```rust
-/// use bst_rs::{BinarySearchTree, IterativeBST};
+/// use bst_rs::{BinarySearchTree, IterativeBST, RecursiveBST};
 ///
-/// // Create a new empty Iterative Binary Search Tree
-/// let mut new_bst = IterativeBST::new();
-/// assert!(new_bst.is_empty());
+/// // Create new empty binary search trees
+/// let mut iterative_bst = IterativeBST::new();
+/// assert!(iterative_bst.is_empty());///
 ///
-/// // Populate new_bst with 5 elements (no duplicates are allowed)
-/// new_bst.insert(10);
-/// new_bst.insert(5);
-/// new_bst.insert(15);
-/// new_bst.insert(18);
-/// new_bst.insert(2);
-/// assert_eq!(new_bst.size(), 5);
+/// let mut recursive_bst = RecursiveBST::new();
+/// assert!(recursive_bst.is_empty());
 ///
-/// // We can also create a IterativeBST from vecs and iterators
-/// let mut bst_from_vec = IterativeBST::from(vec![10, 5, 15, 18, 2]);
-/// let mut bst_from_iter = IterativeBST::from_iter((10..20).map(|node| node > 15));
+/// // Insert elements (no duplicates are allowed)
+/// iterative_bst.insert(10);
+/// iterative_bst.insert(10);   // Element is not inserted
+/// iterative_bst.insert(5);
+/// iterative_bst.insert(2);
+/// iterative_bst.insert(15);
+/// iterative_bst.insert(25);
+/// assert_eq!(iterative_bst.size(), 5);
 ///
-/// // Retrieve the in_order_vec() and sorted_vec() which retrieve the elements in order
-/// assert_eq!(bst_from_vec.in_order_vec(), vec![&2, &5, &10, &15, &18]);
-/// assert_eq!(bst_from_vec.sorted_vec(), vec![&2, &5, &10, &15, &18]);
+/// recursive_bst.insert(10);
+/// recursive_bst.insert(10);   // Element is not inserted
+/// recursive_bst.insert(5);
+/// recursive_bst.insert(2);
+/// recursive_bst.insert(15);
+/// recursive_bst.insert(25);
+/// assert_eq!(recursive_bst.size(), 5);
+///
+/// // Check if element exists
+/// assert!(iterative_bst.contains(&5));    // true
+/// assert!(!iterative_bst.contains(&0));   // false
+///
+/// assert!(recursive_bst.contains(&5));    // true
+/// assert!(!recursive_bst.contains(&0));   // false
+///
+/// // Remove elements
+/// iterative_bst.remove(&10);
+/// iterative_bst.remove(&50);              // No change to tree as element does not exist
+/// assert_eq!(iterative_bst.size(), 4);
+///
+/// recursive_bst.remove(&10);
+/// recursive_bst.remove(&50);              // No change to tree as element does not exist
+/// assert_eq!(recursive_bst.size(), 4);
+///
+/// // View pre-order, in-order and post-order traversals
+/// assert_eq!(iterative_bst.pre_order_vec(), vec![&15, &5, &2, &25]);
+/// assert_eq!(iterative_bst.in_order_vec(), vec![&2, &5, &15, &25]);
+/// assert_eq!(iterative_bst.post_order_vec(), vec![&2, &5, &25, &15]);
+///
+/// assert_eq!(recursive_bst.pre_order_vec(), vec![&15, &5, &2, &25]);
+/// assert_eq!(recursive_bst.in_order_vec(), vec![&2, &5, &15, &25]);
+/// assert_eq!(recursive_bst.post_order_vec(), vec![&2, &5, &25, &15]);
+///
+/// // Compare equality of trees
+/// assert_eq!(iterative_bst.sorted_vec(), recursive_bst.sorted_vec());
+/// assert_ne!(iterative_bst, IterativeBST::new());
+/// assert_ne!(recursive_bst, RecursiveBST::new());
+/// ```
 pub trait BinarySearchTree<T: Ord> {
-    /// Returns the total **number of nodes** within the tree
+    /// Returns the total **number of nodes** within the tree.
     fn size(&self) -> usize;
 
-    /// Returns `true` if the binary search tree contains no nodes
+    /// Returns `true` if the binary search tree contains no nodes.
     fn is_empty(&self) -> bool;
 
-    /// Returns `true` if the binary search tree contains one or more nodes
+    /// Returns `true` if the binary search tree contains one or more nodes.
     fn is_not_empty(&self) -> bool;
 
-    /// Inserts given `value` as an node into the binary search tree.
+    /// Inserts given value as a node.
     ///
-    /// Duplicate values are _not allowed_.
+    /// **Duplicate values are _not allowed_**.
     fn insert(&mut self, value: T);
 
+    /// Returns `true` if the binary search tree contains an element with the given value.
     fn contains(&self, value: &T) -> bool;
+
+    /// Removes the given value.
+    ///
+    /// BST will not be modified if trying to remove element that does not exist.
     fn remove(&mut self, value: &T);
+
+    /// Returns a reference to the element or `None` if element does not exist.
     fn retrieve(&self, value: &T) -> Option<&T>;
+
+    /// Returns a mutable reference to the element (see [`retrieve`](Self::retrieve()))
+    /// or `None` if element does not exist.
     fn retrieve_as_mut(&mut self, value: &T) -> Option<&mut T>;
-    fn height(&self) -> usize;
+
+    /// Returns the **height.**
+    ///
+    /// This is the number of edges between the root and it's furthest leaf node.
+    ///
+    /// # Example
+    ///
+    /// Given a tree that looks like:
+    ///
+    /// ```rust
+    ///  //         4
+    ///  //       /  \
+    ///  //      2    6
+    ///  //     / \  / \
+    ///  //    1  3 5   7
+    /// ```
+    ///
+    /// The height is: **2**
+    fn height(&self) -> Option<isize>;
+
     fn min(&self) -> Option<&T>;
     fn max(&self) -> Option<&T>;
     fn remove_min(&mut self) -> Option<T>;
@@ -170,7 +234,7 @@ pub struct RecursiveBST<T: Ord> {
     size: usize,
 }
 
-/// Am Iterative Binary Search Tree implementation, defined as `IterativeBST<T>` where T _must_
+/// An Iterative Binary Search Tree implementation, defined as `IterativeBST<T>` where T _must_
 /// implement trait [Ord].
 ///
 /// # Important
@@ -188,6 +252,34 @@ struct Node<T: Ord> {
     value: T,
     left: HeapNode<T>,
     right: HeapNode<T>,
+}
+
+impl<T: Ord> IterativeBST<T> {
+    /// Creates an empty `IterativeBST<T>`
+    ///
+    /// No nodes are allocated on the heap yet
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use bst_rs::{BinarySearchTree, IterativeBST};
+    ///
+    /// // Empty tree is created
+    /// let mut bst: IterativeBST<i32> = IterativeBST::new();
+    /// assert!(bst.is_empty())
+    pub fn new() -> IterativeBST<T> {
+        IterativeBST {
+            root: None,
+            size: 0,
+        }
+    }
+}
+
+impl<T: Ord> Default for IterativeBST<T> {
+    /// Creates an empty `IterativeBST<T>`
+    fn default() -> IterativeBST<T> {
+        IterativeBST::new()
+    }
 }
 
 impl<T: Ord> PartialEq for IterativeBST<T> {
@@ -250,94 +342,6 @@ impl<T: Ord + Debug> Display for IterativeBST<T> {
     }
 }
 
-impl<T: Ord> PartialEq for RecursiveBST<T> {
-    fn eq(&self, other: &Self) -> bool {
-        self.sorted_vec() == other.sorted_vec()
-    }
-}
-
-impl<T: Ord> Extend<T> for RecursiveBST<T> {
-    fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
-        for value in iter.into_iter() {
-            self.insert(value)
-        }
-    }
-}
-
-impl<T: Ord> FromIterator<T> for RecursiveBST<T> {
-    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
-        let mut bst = RecursiveBST::new();
-        bst.extend(iter);
-        bst
-    }
-}
-
-impl<T: Ord> From<Vec<T>> for RecursiveBST<T> {
-    fn from(vec: Vec<T>) -> Self {
-        let mut bst = RecursiveBST::new();
-        for value in vec.into_iter() {
-            bst.insert(value);
-        }
-        bst
-    }
-}
-
-impl<T: Ord + Clone> From<&[T]> for RecursiveBST<T> {
-    fn from(slice: &[T]) -> Self {
-        let mut bst = RecursiveBST::new();
-        for value in slice {
-            bst.insert((*value).clone());
-        }
-        bst
-    }
-}
-
-impl<T: Ord + Clone> Clone for RecursiveBST<T> {
-    fn clone(&self) -> Self {
-        let mut bst = RecursiveBST::new();
-
-        for value in self.in_order_iter() {
-            bst.insert((*value).clone());
-        }
-
-        bst
-    }
-}
-
-impl<T: Ord + Debug> Display for RecursiveBST<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.sorted_vec())
-    }
-}
-
-impl<T: Ord> IterativeBST<T> {
-    /// Creates an empty `IterativeBST<T>`
-    ///
-    /// No nodes are allocated on the heap yet
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// use bst_rs::{BinarySearchTree, IterativeBST};
-    ///
-    /// // Empty tree is created
-    /// let mut bst: IterativeBST<i32> = IterativeBST::new();
-    /// assert!(bst.is_empty())
-    pub fn new() -> IterativeBST<T> {
-        IterativeBST {
-            root: None,
-            size: 0,
-        }
-    }
-}
-
-impl<T: Ord> Default for IterativeBST<T> {
-    /// Creates an empty `IterativeBST<T>`
-    fn default() -> IterativeBST<T> {
-        IterativeBST::new()
-    }
-}
-
 impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
     /// Returns the total **number of nodes** within the tree.
     ///
@@ -388,10 +392,10 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
         Node::iterative_retrieve_as_mut(&mut self.root, value)
     }
 
-    fn height(&self) -> usize {
+    fn height(&self) -> Option<isize> {
         match self.root {
-            None => 0,
-            Some(_) => Node::iterative_height(&self.root),
+            None => None,
+            Some(_) => Some(Node::iterative_height(&self.root)),
         }
     }
 
@@ -504,6 +508,66 @@ impl<T: Ord> Default for RecursiveBST<T> {
     }
 }
 
+impl<T: Ord> PartialEq for RecursiveBST<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.sorted_vec() == other.sorted_vec()
+    }
+}
+
+impl<T: Ord> Extend<T> for RecursiveBST<T> {
+    fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
+        for value in iter.into_iter() {
+            self.insert(value)
+        }
+    }
+}
+
+impl<T: Ord> FromIterator<T> for RecursiveBST<T> {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        let mut bst = RecursiveBST::new();
+        bst.extend(iter);
+        bst
+    }
+}
+
+impl<T: Ord> From<Vec<T>> for RecursiveBST<T> {
+    fn from(vec: Vec<T>) -> Self {
+        let mut bst = RecursiveBST::new();
+        for value in vec.into_iter() {
+            bst.insert(value);
+        }
+        bst
+    }
+}
+
+impl<T: Ord + Clone> From<&[T]> for RecursiveBST<T> {
+    fn from(slice: &[T]) -> Self {
+        let mut bst = RecursiveBST::new();
+        for value in slice {
+            bst.insert((*value).clone());
+        }
+        bst
+    }
+}
+
+impl<T: Ord + Clone> Clone for RecursiveBST<T> {
+    fn clone(&self) -> Self {
+        let mut bst = RecursiveBST::new();
+
+        for value in self.in_order_iter() {
+            bst.insert((*value).clone());
+        }
+
+        bst
+    }
+}
+
+impl<T: Ord + Debug> Display for RecursiveBST<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.sorted_vec())
+    }
+}
+
 impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
     /// Returns the total **number of nodes** within the tree.
     ///
@@ -571,11 +635,10 @@ impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
         }
     }
 
-    fn height(&self) -> usize {
-        match self.root {
-            None => 0,
-            Some(_) => Node::recursive_height(&self.root),
-        }
+    fn height(&self) -> Option<isize> {
+        self.root
+            .as_ref()
+            .map(|_| Node::recursive_height(&self.root))
     }
 
     fn min(&self) -> Option<&T> {
@@ -826,8 +889,8 @@ impl<T: Ord> Node<T> {
         }
     }
 
-    fn iterative_height(root: &HeapNode<T>) -> usize {
-        let mut height = 0;
+    fn iterative_height(root: &HeapNode<T>) -> isize {
+        let mut height = -1;
         let mut queue = VecDeque::new();
         queue.push_front(root);
 
@@ -849,9 +912,9 @@ impl<T: Ord> Node<T> {
         height
     }
 
-    fn recursive_height(root: &HeapNode<T>) -> usize {
+    fn recursive_height(root: &HeapNode<T>) -> isize {
         match root {
-            None => 0,
+            None => -1,
             Some(node) => {
                 1 + max(
                     Node::recursive_height(&node.left),
@@ -1093,12 +1156,12 @@ impl<T: Ord> Node<T> {
 
     fn recursive_level_order_vec<'a>(root: &'a HeapNode<T>, elements: &mut Vec<&'a T>) {
         let height = Node::recursive_height(root);
-        for i in 1..=height {
+        for i in 1..=height + 1 {
             Node::recursive_current_level(root, elements, i);
         }
     }
 
-    fn recursive_current_level<'a>(root: &'a HeapNode<T>, elements: &mut Vec<&'a T>, level: usize) {
+    fn recursive_current_level<'a>(root: &'a HeapNode<T>, elements: &mut Vec<&'a T>, level: isize) {
         if root.is_some() {
             match level.cmp(&1) {
                 Ordering::Less => {}
@@ -1223,7 +1286,7 @@ impl<T: Ord> Node<T> {
 
     fn recursive_consume_level_order_vec(root: HeapNode<T>, elements: &mut Vec<T>) {
         let height = Node::recursive_height(&root);
-        for i in 0..height {
+        for i in 0..height + 1 {
             // SAFETY: this is sound because dealloc_boxes ensures that the elements don't
             // get dropped again
             unsafe { Node::write_level_into_vec(&root, elements, i) };
@@ -1236,7 +1299,7 @@ impl<T: Ord> Node<T> {
     /// The caller must ensure that the values contained in the heap are not dropped again.
     ///
     /// Otherwise this could lead to a double free.
-    unsafe fn write_level_into_vec(root: &HeapNode<T>, elements: &mut Vec<T>, level: usize) {
+    unsafe fn write_level_into_vec(root: &HeapNode<T>, elements: &mut Vec<T>, level: isize) {
         if let Some(node) = root {
             if level == 0 {
                 // "move" the value without actually moving

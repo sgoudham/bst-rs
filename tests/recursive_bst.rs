@@ -624,7 +624,10 @@ fn successfully_get_level_order_vec() {
     bst.insert(16);
     bst.insert(25);
 
-    assert_eq!(bst.level_order_vec(), vec![&15, &10, &20, &8, &12, &16, &25]);
+    assert_eq!(
+        bst.level_order_vec(),
+        vec![&15, &10, &20, &8, &12, &16, &25]
+    );
 }
 
 #[test]

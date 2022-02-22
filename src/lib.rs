@@ -167,7 +167,7 @@ pub trait BinarySearchTree<T: Ord> {
 
     /// Removes the given value.
     ///
-    /// BST will not be modified if trying to remove element that does not exist.
+    /// Tree will not be modified if trying to remove element that does not exist.
     fn remove(&mut self, value: &T);
 
     /// Returns a reference to the element or `None` if element does not exist.
@@ -196,10 +196,19 @@ pub trait BinarySearchTree<T: Ord> {
     /// The height is: **2**
     fn height(&self) -> Option<isize>;
 
+    /// Returns a reference to the minimum element of the tree or `None` if tree is empty.
     fn min(&self) -> Option<&T>;
+
+    /// Returns a reference to the maximum element of the tree or `None` if tree is empty.
     fn max(&self) -> Option<&T>;
+
+    // Removes and returns the minimum element from the tree or `None` if tree is empty.
     fn remove_min(&mut self) -> Option<T>;
+
+    // Removes and returns the maximum element from the tree or `None` if tree is empty.
     fn remove_max(&mut self) -> Option<T>;
+
+
     fn sorted_vec(&self) -> Vec<&T>;
     fn into_sorted_vec(self) -> Vec<T>;
     fn pre_order_vec(&self) -> Vec<&T>;

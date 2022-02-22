@@ -9,14 +9,14 @@
 //! ## Author Notes
 //!
 //! I have made this library with the personal goals of learning and solidifying concepts such
-//! as ownership, borrowing, generics and lifetimes. I cannot promise that the implementations are
+//! as **ownership**, **borrowing**, **generics** and **lifetimes**. I cannot promise that the implementations are
 //! particularly efficient, or if they are, it was not at the forefront of my mind.
 //!
-//! That being said, there are some areas I would love to improve/include:
-//! - Write Rust more idiomatically.
-//! - Implement a `pretty_print()` function to display the binary search trees nicely.
-//! - Implementing the Drop trait for iterative node cleanup.
-//! - Pre-allocating space on the heap for nodes to reduce inefficiency of inserts.
+//! That being said, there are some areas I would love to improve upon/include:
+//! - Write idiomatic code.
+//! - Implement a **pretty_print()** function to display the binary search trees nicely.
+//! - Implement [Drop] trait for iterative node cleanup.
+//! - Pre-allocate space on the heap for nodes to reduce inefficiency of inserts.
 //!
 //! I'm more than happy to accept (and encourage) contributions if anyone is kind enough to do so.
 //!
@@ -113,23 +113,20 @@ use std::vec::IntoIter;
 /// assert_eq!(bst_from_vec.in_order_vec(), vec![&2, &5, &10, &15, &18]);
 /// assert_eq!(bst_from_vec.sorted_vec(), vec![&2, &5, &10, &15, &18]);
 pub trait BinarySearchTree<T: Ord> {
-    /// Create an empty Binary Search Tree
-    ///
-    /// No nodes are allocated on the heap yet
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// use bst_rs::{BinarySearchTree, IterativeBST};
-    ///
-    /// let mut bst: IterativeBST<i32> = IterativeBST::new();
-    /// assert!(bst.is_empty())
-    fn new() -> Self;
-
+    /// Returns the total **number of nodes** within the tree
     fn size(&self) -> usize;
+
+    /// Returns `true` if the binary search tree contains no nodes
     fn is_empty(&self) -> bool;
+
+    /// Returns `true` if the binary search tree contains one or more nodes
     fn is_not_empty(&self) -> bool;
+
+    /// Inserts given `value` as an node into the binary search tree.
+    ///
+    /// Duplicate values are _not allowed_.
     fn insert(&mut self, value: T);
+
     fn contains(&self, value: &T) -> bool;
     fn remove(&mut self, value: &T);
     fn retrieve(&self, value: &T) -> Option<&T>;
@@ -157,12 +154,29 @@ pub trait BinarySearchTree<T: Ord> {
 
 type HeapNode<T> = Option<Box<Node<T>>>;
 
+/// A Recursive Binary Search Tree implementation, defined as `RecursiveBST<T>` where T _must_
+/// implement trait [Ord].
+///
+/// # Important
+///
+/// It is also important to note that [RecursiveBST] is more likely to **blow the stack** and is
+/// generally less performant compared to [IterativeBST].
+///
+/// For more information on why that is the case, please have a look at
+/// [The Story of Tail Call Optimizations in Rust.](https://seanchen1991.github.io/posts/tco-story/)
 #[derive(Debug)]
 pub struct RecursiveBST<T: Ord> {
     root: HeapNode<T>,
     size: usize,
 }
 
+/// Am Iterative Binary Search Tree implementation, defined as `IterativeBST<T>` where T _must_
+/// implement trait [Ord].
+///
+/// # Important
+///
+/// This should be preferred against [RecursiveBST] as this should generally be
+/// more performant.
 #[derive(Debug)]
 pub struct IterativeBST<T: Ord> {
     root: HeapNode<T>,
@@ -296,14 +310,48 @@ impl<T: Ord + Debug> Display for RecursiveBST<T> {
     }
 }
 
-impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
-    fn new() -> IterativeBST<T> {
+impl<T: Ord> IterativeBST<T> {
+    /// Creates an empty `IterativeBST<T>`
+    ///
+    /// No nodes are allocated on the heap yet
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use bst_rs::{BinarySearchTree, IterativeBST};
+    ///
+    /// // Empty tree is created
+    /// let mut bst: IterativeBST<i32> = IterativeBST::new();
+    /// assert!(bst.is_empty())
+    pub fn new() -> IterativeBST<T> {
         IterativeBST {
             root: None,
             size: 0,
         }
     }
+}
 
+impl<T: Ord> Default for IterativeBST<T> {
+    /// Creates an empty `IterativeBST<T>`
+    fn default() -> IterativeBST<T> {
+        IterativeBST::new()
+    }
+}
+
+impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
+    /// Returns the total **number of nodes** within the tree.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use bst_rs::{BinarySearchTree, IterativeBST};
+    ///
+    /// let mut bst = IterativeBST::new();
+    /// bst.insert(5);
+    /// bst.insert(10);
+    /// bst.insert(3);
+    ///
+    /// assert_eq!(bst.size(), 3);
     fn size(&self) -> usize {
         self.size
     }
@@ -428,14 +476,48 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
     }
 }
 
-impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
-    fn new() -> RecursiveBST<T> {
+impl<T: Ord> RecursiveBST<T> {
+    /// Creates an empty `RecursiveBST<T>`
+    ///
+    /// No nodes are allocated on the heap yet
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use bst_rs::{BinarySearchTree, RecursiveBST};
+    //t /
+    /// // Empty tree is created
+    /// let mut bst: RecursiveBST<i32> = RecursiveBST::new();
+    /// assert!(bst.is_empty())
+    pub fn new() -> RecursiveBST<T> {
         RecursiveBST {
             root: None,
             size: 0,
         }
     }
+}
 
+impl<T: Ord> Default for RecursiveBST<T> {
+    /// Creates an empty `RecursiveBST<T>`
+    fn default() -> RecursiveBST<T> {
+        RecursiveBST::new()
+    }
+}
+
+impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
+    /// Returns the total **number of nodes** within the tree.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use bst_rs::{BinarySearchTree, RecursiveBST};
+    ///
+    /// let mut bst = RecursiveBST::new();
+    /// bst.insert(5);
+    /// bst.insert(10);
+    /// bst.insert(3);
+    ///
+    /// assert_eq!(bst.size(), 3);
     fn size(&self) -> usize {
         self.size
     }

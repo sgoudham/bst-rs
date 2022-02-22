@@ -248,8 +248,7 @@ pub struct RecursiveBST<T: Ord> {
 ///
 /// # Important
 ///
-/// This should be preferred against [RecursiveBST] as this should generally be
-/// more performant.
+/// This should be preferred over [RecursiveBST] for reasons listed in crate level documentation.
 #[derive(Debug)]
 pub struct IterativeBST<T: Ord> {
     root: HeapNode<T>,

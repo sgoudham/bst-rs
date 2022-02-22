@@ -570,33 +570,6 @@ fn into_level_order_iter_with_many_elements() {
 }
 
 #[test]
-fn successfully_get_sorted_vec() {
-    let bst: RecursiveBST<i32> = RecursiveBST::new();
-    assert!(bst.sorted_vec().is_empty());
-
-    let mut bst = RecursiveBST::new();
-    bst.insert(3);
-    bst.insert(4);
-    bst.insert(5);
-    bst.insert(1);
-    bst.insert(2);
-
-    assert_eq!(bst.sorted_vec(), vec![&1, &2, &3, &4, &5]);
-}
-
-#[test]
-fn successfully_transfer_bst_into_sorted_vec() {
-    let mut bst = RecursiveBST::new();
-    bst.insert(3);
-    bst.insert(4);
-    bst.insert(5);
-    bst.insert(1);
-    bst.insert(2);
-
-    assert_eq!(bst.into_sorted_vec(), vec![1, 2, 3, 4, 5]);
-}
-
-#[test]
 fn successfully_get_pre_order_vec() {
     let mut bst = RecursiveBST::new();
     assert!(bst.pre_order_vec().is_empty());

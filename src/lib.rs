@@ -75,7 +75,7 @@
 //! assert_eq!(recursive_bst.post_order_vec(), vec![&2, &5, &25, &15]);
 //!
 //! // Compare equality of trees
-//! assert_eq!(iterative_bst.sorted_vec(), recursive_bst.sorted_vec());
+//! assert_eq!(iterative_bst.asc_order_vec(), recursive_bst.asc_order_vec());
 //! assert_ne!(iterative_bst, IterativeBST::new());
 //! assert_ne!(recursive_bst, RecursiveBST::new());
 //! ```
@@ -143,7 +143,7 @@ use std::vec::IntoIter;
 /// assert_eq!(recursive_bst.post_order_vec(), vec![&2, &5, &25, &15]);
 ///
 /// // Compare equality of trees
-/// assert_eq!(iterative_bst.sorted_vec(), recursive_bst.sorted_vec());
+/// assert_eq!(iterative_bst.asc_order_vec(), recursive_bst.asc_order_vec());
 /// assert_ne!(iterative_bst, IterativeBST::new());
 /// assert_ne!(recursive_bst, RecursiveBST::new());
 /// ```
@@ -202,26 +202,133 @@ pub trait BinarySearchTree<T: Ord> {
     /// Returns a reference to the maximum element of the tree or `None` if tree is empty.
     fn max(&self) -> Option<&T>;
 
-    // Removes and returns the minimum element from the tree or `None` if tree is empty.
+    /// Removes and returns the minimum element from the tree or `None` if tree is empty.
     fn remove_min(&mut self) -> Option<T>;
 
-    // Removes and returns the maximum element from the tree or `None` if tree is empty.
+    /// Removes and returns the maximum element from the tree or `None` if tree is empty.
     fn remove_max(&mut self) -> Option<T>;
 
+    /// Returns references to the elements of the tree in **ascending order.**`
+    ///
+    /// # Important
+    ///
+    /// This is function is analogous to [in_order_vec](Self::in_order_vec()) as the underlying
+    /// behaviour is **_exactly the same_.**
+    fn asc_order_vec(&self) -> Vec<&T>;
 
-    fn sorted_vec(&self) -> Vec<&T>;
-    fn into_sorted_vec(self) -> Vec<T>;
+    /// Returns references to the elements of the tree in the order of a **pre-order traversal.**
+    ///
+    /// # Example
+    ///
+    /// Given a tree that looks like:
+    /// ```rust
+    ///  //         4
+    ///  //       /  \
+    ///  //      2    6
+    ///  //     / \  / \
+    ///  //    1  3 5   7
+    /// ```
+    /// The pre_order_vec is: **[&4, &2, &1, &3, &6, &5, &7].**
     fn pre_order_vec(&self) -> Vec<&T>;
+
+    /// Returns references to the elements of the tree in the order of an **in-order traversal.**
+    ///
+    /// # Important
+    ///
+    /// This is function is analogous to [asc_order_vec](Self::asc_order_vec()) as the underlying
+    /// behaviour is **_exactly the same_.**
+    ///
+    /// # Example
+    ///
+    /// Given a tree that looks like:
+    /// ```rust
+    ///  //         4
+    ///  //       /  \
+    ///  //      2    6
+    ///  //     / \  / \
+    ///  //    1  3 5   7
+    /// ```
+    /// The in_order_vec is: **[&1, &2, &3, &4, &5, &6, &7, &8].**
     fn in_order_vec(&self) -> Vec<&T>;
+
+    /// Returns references to the elements of the tree in the order of a **post-order traversal.**
+    ///
+    /// # Example
+    ///
+    /// Given a tree that looks like:
+    /// ```rust
+    ///  //         4
+    ///  //       /  \
+    ///  //      2    6
+    ///  //     / \  / \
+    ///  //    1  3 5   7
+    /// ```
+    /// The post_order_vec is: **[&1, &3, &2, &5, &7, &6, &4].**
     fn post_order_vec(&self) -> Vec<&T>;
+
+    /// Returns references to the elements of the tree in the order of a **level-order traversal.**
+    ///
+    /// # Example
+    ///
+    /// Given a tree that looks like:
+    /// ```rust
+    ///  //         4
+    ///  //       /  \
+    ///  //      2    6
+    ///  //     / \  / \
+    ///  //    1  3 5   7
+    /// ```
+    /// The post_order_vec is: **[&4, &2, &6, &1, &3, &5, &7].**
     fn level_order_vec(&self) -> Vec<&T>;
+
+    /// Returns an iterator over [asc_order_vec](Self::asc_order_vec()).
+    ///
+    /// # Important
+    ///
+    /// This is function is analogous to [in_order_iter](Self::in_order_iter()) as the underlying
+    /// behaviour is **_exactly the same_.**
+    fn asc_order_iter(&self) -> IntoIter<&T>;
+
+    /// Returns an iterator over [pre_order_vec](Self::pre_order_vec()).
     fn pre_order_iter(&self) -> IntoIter<&T>;
+
+    /// Returns an iterator over [in_order_vec](Self::in_order_vec()).
+    ///
+    /// # Important
+    ///
+    /// This is function is analogous to [asc_order_iter](Self::asc_order_iter()) as the underlying
+    /// behaviour is **_exactly the same_.**
     fn in_order_iter(&self) -> IntoIter<&T>;
+
+    /// Returns an iterator over [post_order_vec](Self::post_order_vec()).
     fn post_order_iter(&self) -> IntoIter<&T>;
+
+    /// Returns an iterator over [level_order_vec](Self::level_order_vec()).
     fn level_order_iter(&self) -> IntoIter<&T>;
+
+    /// Returns [asc_order_iter](Self::asc_order_iter()) **AND** consumes the tree.
+    ///
+    /// # Important
+    ///
+    /// This is function is analogous to [into_in_order_iter](Self::into_in_order_iter()) as the
+    /// underlying behaviour is **_exactly the same_.**
+    fn into_asc_order_iter(self) -> IntoIter<T>;
+
+    /// Returns [pre_order_iter](Self::pre_order_iter()) **AND** consumes the tree.
     fn into_pre_order_iter(self) -> IntoIter<T>;
+
+    /// Returns [in_order_iter](Self::in_order_iter()) **AND** consumes the tree.
+    ///
+    /// # Important
+    ///
+    /// This is function is analogous to [into_asc_order_iter](Self::into_asc_order_iter()) as the
+    /// underlying behaviour is **_exactly the same_.**
     fn into_in_order_iter(self) -> IntoIter<T>;
+
+    /// Returns [post_order_iter](Self::post_order_iter()) **AND** consumes the tree.
     fn into_post_order_iter(self) -> IntoIter<T>;
+
+    /// Returns [level_order_iter](Self::level_order_iter()) **AND** consumes the tree.
     fn into_level_order_iter(self) -> IntoIter<T>;
 }
 
@@ -292,7 +399,7 @@ impl<T: Ord> Default for IterativeBST<T> {
 
 impl<T: Ord> PartialEq for IterativeBST<T> {
     fn eq(&self, other: &Self) -> bool {
-        self.sorted_vec() == other.sorted_vec()
+        self.asc_order_vec() == other.asc_order_vec()
     }
 }
 
@@ -346,7 +453,7 @@ impl<T: Ord + Clone> Clone for IterativeBST<T> {
 
 impl<T: Ord + Debug> Display for IterativeBST<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.sorted_vec())
+        write!(f, "{:?}", self.asc_order_vec())
     }
 }
 
@@ -430,12 +537,8 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
         removed_max
     }
 
-    fn sorted_vec(&self) -> Vec<&T> {
-        Node::iterative_in_order_vec(&self.root)
-    }
-
-    fn into_sorted_vec(self) -> Vec<T> {
-        Node::iterative_consume_in_order_vec(self.root)
+    fn asc_order_vec(&self) -> Vec<&T> {
+        self.in_order_vec()
     }
 
     fn pre_order_vec(&self) -> Vec<&T> {
@@ -454,6 +557,10 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
         Node::iterative_level_order_vec(&self.root)
     }
 
+    fn asc_order_iter(&self) -> IntoIter<&T> {
+        self.in_order_iter()
+    }
+
     fn pre_order_iter(&self) -> IntoIter<&T> {
         Node::iterative_pre_order_vec(&self.root).into_iter()
     }
@@ -468,6 +575,10 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
 
     fn level_order_iter(&self) -> IntoIter<&T> {
         Node::iterative_level_order_vec(&self.root).into_iter()
+    }
+
+    fn into_asc_order_iter(self) -> IntoIter<T> {
+        todo!()
     }
 
     fn into_pre_order_iter(self) -> IntoIter<T> {
@@ -517,7 +628,7 @@ impl<T: Ord> Default for RecursiveBST<T> {
 
 impl<T: Ord> PartialEq for RecursiveBST<T> {
     fn eq(&self, other: &Self) -> bool {
-        self.sorted_vec() == other.sorted_vec()
+        self.asc_order_vec() == other.asc_order_vec()
     }
 }
 
@@ -571,7 +682,7 @@ impl<T: Ord + Clone> Clone for RecursiveBST<T> {
 
 impl<T: Ord + Debug> Display for RecursiveBST<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.sorted_vec())
+        write!(f, "{:?}", self.asc_order_vec())
     }
 }
 
@@ -688,15 +799,9 @@ impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
         removed_max
     }
 
-    fn sorted_vec(&self) -> Vec<&T> {
+    fn asc_order_vec(&self) -> Vec<&T> {
         let mut elements: Vec<&T> = Vec::new();
         Node::recursive_in_order_vec(&self.root, &mut elements);
-        elements
-    }
-
-    fn into_sorted_vec(self) -> Vec<T> {
-        let mut elements = Vec::new();
-        Node::recursive_consume_in_order_vec(self.root, &mut elements);
         elements
     }
 
@@ -724,6 +829,12 @@ impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
         elements
     }
 
+    fn asc_order_iter(&self) -> IntoIter<&T> {
+        let mut elements = Vec::new();
+        Node::recursive_in_order_vec(&self.root, &mut elements);
+        elements.into_iter()
+    }
+
     fn pre_order_iter(&self) -> IntoIter<&T> {
         let mut elements: Vec<&T> = Vec::new();
         Node::recursive_pre_order_vec(&self.root, &mut elements);
@@ -746,6 +857,10 @@ impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
         let mut elements: Vec<&T> = Vec::new();
         Node::recursive_level_order_vec(&self.root, &mut elements);
         elements.into_iter()
+    }
+
+    fn into_asc_order_iter(self) -> IntoIter<T> {
+        self.into_in_order_iter()
     }
 
     fn into_pre_order_iter(self) -> IntoIter<T> {

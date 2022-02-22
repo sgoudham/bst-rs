@@ -578,7 +578,7 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
     }
 
     fn into_asc_order_iter(self) -> IntoIter<T> {
-        todo!()
+        self.into_in_order_iter()
     }
 
     fn into_pre_order_iter(self) -> IntoIter<T> {

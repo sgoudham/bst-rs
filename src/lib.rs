@@ -231,7 +231,7 @@ pub trait BinarySearchTree<T: Ord> {
     /// Removes and returns the maximum element from the tree or `None` if tree is empty.
     fn remove_max(&mut self) -> Option<T>;
 
-    /// Returns references to the elements of the tree in **ascending order.**`
+    /// Returns references to the elements of the tree in **ascending order.**
     ///
     /// # Important
     ///

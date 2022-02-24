@@ -14,7 +14,7 @@
 //!
 //! That being said, there are some areas I would love to improve upon/include:
 //! - Write idiomatic code.
-//! - Effectively use macros to reduce large portions of repetitive code.
+//! - Effectively use [macro_rules!] to reduce large portions of repetitive code.
 //! - Implement a **pretty_print()** function to display the binary search trees nicely.
 //! - Implement [Drop] trait for iterative node cleanup.
 //! - Pre-allocate space on the heap for nodes to reduce inefficiency of inserts.
@@ -356,8 +356,7 @@ pub trait BinarySearchTree<T: Ord> {
     fn into_level_order_iter(self) -> IntoIter<T>;
 }
 
-/// A Recursive Binary Search Tree implementation, defined as `RecursiveBST<T>` where T _must_
-/// implement trait [Ord].
+/// Recursive Binary Search Tree implementation.
 ///
 /// # Important
 ///
@@ -372,8 +371,7 @@ pub struct RecursiveBST<T: Ord> {
     size: usize,
 }
 
-/// An Iterative Binary Search Tree implementation, defined as `IterativeBST<T>` where T _must_
-/// implement trait [Ord].
+/// Iterative Binary Search Tree implementation.
 ///
 /// # Important
 ///

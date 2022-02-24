@@ -14,7 +14,7 @@
 //!
 //! That being said, there are some areas I would love to improve upon/include:
 //! - Write idiomatic code.
-//! - Effectively use [macro_rules!] to reduce large portions of repetitive code.
+//! - Effectively use **macro_rules!** to reduce large portions of repetitive code.
 //! - Implement a **pretty_print()** function to display the binary search trees nicely.
 //! - Implement [Drop] trait for iterative node cleanup.
 //! - Pre-allocate space on the heap for nodes to reduce inefficiency of inserts.

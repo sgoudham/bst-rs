@@ -1636,7 +1636,7 @@ impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
         removed_max
     }
 
-    /// Returns references to the elements of the tree in **ascending order.**`
+    /// Returns references to the elements of the tree in **ascending order.**
     ///
     /// # Important
     ///

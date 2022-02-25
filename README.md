@@ -136,5 +136,5 @@ Please read the [CONTRIBUTING.md](CONTRIBUTING.md) before contributing! (Thank y
 ## Inspiration
 
 The book [Learn Rust With Entirely Too Many Linked Lists](https://rust-unofficial.github.io/too-many-lists/) inspired me
-to try and implement a Binary Search Trees within the language. I had also been wanting to create my first library for
+to try and implement Binary Search Trees within the language. I had also been wanting to create my first library for
 other crates to use.

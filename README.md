@@ -1,5 +1,10 @@
 # bst-rs
 
+[![build](https://github.com/sgoudham/bst-rs/actions/workflows/build.yml/badge.svg)](https://github.com/sgoudham/bst-rs/actions/workflows/build.yml)
+[![crate.io](https://img.shields.io/crates/v/bst-rs)](https://crates.io/crates/bst-rs)
+[![downloads](https://img.shields.io/crates/d/bst-rs)](https://crates.io/crates/bst-rs)
+[![license](https://img.shields.io/github/license/sgoudham/bst-rs)](LICENSE)
+
 > Recursive & Iterative Binary Search Tree Implementations within Rust
 
 ## Table of Contents
@@ -29,10 +34,11 @@ I have made this library with the personal goals of learning and solidifying con
 , `generics` and `lifetimes`. I cannot promise that the implementations are particularly efficient, or if they are, it
 was not at the forefront of my mind.
 
-That being said, there are some areas I would love to improve/include:
+That being said, there are some areas I would love to improve upon/include:
 
-- [ ] Write Rust more idiomatically.
-- [ ] Implement a `pretty_print()` function to display the binary search trees nicely.
+- [ ] Write idiomatic code.
+- [ ] Effectively use **macro_rules!** to reduce large portions of repetitive code.
+- [ ] Implement a **pretty_print()** function to display the binary search trees nicely.
 - [ ] Implementing the Drop trait for iterative node cleanup.
 - [ ] Pre-allocating space on the heap for nodes to reduce inefficiency of inserts.
 
@@ -41,7 +47,7 @@ at [CONTRIBUTING!](#Contributing))
 
 ## Quick Start
 
-```rust
+ ```rust
 use bst_rs::{BinarySearchTree, IterativeBST, RecursiveBST};
 
 // Create new empty binary search trees
@@ -58,8 +64,8 @@ iterative_bst.insert(5);
 iterative_bst.insert(2);
 iterative_bst.insert(15);
 iterative_bst.insert(25);
-
 assert_eq!(iterative_bst.size(), 5);
+
 recursive_bst.insert(10);
 recursive_bst.insert(10);   // Element is not inserted
 recursive_bst.insert(5);
@@ -71,6 +77,7 @@ assert_eq!(recursive_bst.size(), 5);
 // Check if element exists
 assert!(iterative_bst.contains(&5));    // true
 assert!(!iterative_bst.contains(&0));   // false
+
 assert!(recursive_bst.contains(&5));    // true
 assert!(!recursive_bst.contains(&0));   // false
 
@@ -83,20 +90,40 @@ recursive_bst.remove(&10);
 recursive_bst.remove(&50); // No change to tree as element does not exist
 assert_eq!(recursive_bst.size(), 4);
 
-// View pre-order, in-order and post-order traversals
+// Get height of tree
+assert_eq!(iterative_bst.height(), Some(2));
+assert_eq!(recursive_bst.height(), Some(2));
+
+// Get minimum element of tree
+assert_eq!(iterative_bst.min(), Some(&2));
+assert_eq!(recursive_bst.min(), Some(&2));
+
+// Get maximum element of tree
+assert_eq!(iterative_bst.max(), Some(&25));
+assert_eq!(recursive_bst.max(), Some(&25));
+
+// Retrieve reference to element in tree
+assert_eq!(iterative_bst.retrieve(&5), Some(&5));
+assert_eq!(iterative_bst.retrieve(&100), None); // Element does not exist so None is returned
+assert_eq!(recursive_bst.retrieve(&5), Some(&5));
+assert_eq!(recursive_bst.retrieve(&100), None); // Element does not exist so None is returned
+
+// View pre-order, in-order, post-order and level-order traversals
 assert_eq!(iterative_bst.pre_order_vec(), vec![&15, &5, &2, &25]);
 assert_eq!(iterative_bst.in_order_vec(), vec![&2, &5, &15, &25]);
 assert_eq!(iterative_bst.post_order_vec(), vec![&2, &5, &25, &15]);
+assert_eq!(iterative_bst.level_order_vec(), vec![&15, &5, &25, &2]);
 
 assert_eq!(recursive_bst.pre_order_vec(), vec![&15, &5, &2, &25]);
 assert_eq!(recursive_bst.in_order_vec(), vec![&2, &5, &15, &25]);
 assert_eq!(recursive_bst.post_order_vec(), vec![&2, &5, &25, &15]);
+assert_eq!(recursive_bst.level_order_vec(), vec![&15, &5, &25, &2]);
 
-// Compare equality of trees
-assert_eq!(iterative_bst.sorted_vec(), recursive_bst.sorted_vec());
+// Compare equality/in-equality of trees
+assert_eq!(iterative_bst.asc_order_vec(), recursive_bst.asc_order_vec());
 assert_ne!(iterative_bst, IterativeBST::new());
 assert_ne!(recursive_bst, RecursiveBST::new());
-```
+ ```
 
 ## License
 

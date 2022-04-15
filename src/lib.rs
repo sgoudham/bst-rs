@@ -12,7 +12,7 @@
 //! as **ownership**, **borrowing**, **generics** and **lifetimes**. I cannot promise that the implementations are
 //! particularly efficient, or if they are, it was not at the forefront of my mind.
 //!
-//! That being said, there are some areas I would love to improve upon/include:
+//! That being said, there are some areas I would love to improve upon which include:
 //! - Write idiomatic code.
 //! - Effectively use **macro_rules!** to reduce large portions of repetitive code.
 //! - Implement a **pretty_print()** function to display the binary search trees nicely.
@@ -236,7 +236,7 @@ pub trait BinarySearchTree<T: Ord> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [in_order_vec](Self::in_order_vec()) as the underlying
+    /// This function is analogous to [in_order_vec](Self::in_order_vec()) as the underlying
     /// behaviour is **_exactly the same_.**
     fn asc_order_vec(&self) -> Vec<&T>;
 
@@ -259,7 +259,7 @@ pub trait BinarySearchTree<T: Ord> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [asc_order_vec](Self::asc_order_vec()) as the underlying
+    /// This function is analogous to [asc_order_vec](Self::asc_order_vec()) as the underlying
     /// behaviour is **_exactly the same_.**
     ///
     /// # Example
@@ -309,7 +309,7 @@ pub trait BinarySearchTree<T: Ord> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [in_order_iter](Self::in_order_iter()) as the underlying
+    /// This function is analogous to [in_order_iter](Self::in_order_iter()) as the underlying
     /// behaviour is **_exactly the same_.**
     fn asc_order_iter(&self) -> IntoIter<&T>;
 
@@ -320,7 +320,7 @@ pub trait BinarySearchTree<T: Ord> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [asc_order_iter](Self::asc_order_iter()) as the underlying
+    /// This function is analogous to [asc_order_iter](Self::asc_order_iter()) as the underlying
     /// behaviour is **_exactly the same_.**
     fn in_order_iter(&self) -> IntoIter<&T>;
 
@@ -334,7 +334,7 @@ pub trait BinarySearchTree<T: Ord> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [into_in_order_iter](Self::into_in_order_iter()) as the
+    /// This function is analogous to [into_in_order_iter](Self::into_in_order_iter()) as the
     /// underlying behaviour is **_exactly the same_.**
     fn into_asc_order_iter(self) -> IntoIter<T>;
 
@@ -345,7 +345,7 @@ pub trait BinarySearchTree<T: Ord> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [into_asc_order_iter](Self::into_asc_order_iter()) as the
+    /// This function is analogous to [into_asc_order_iter](Self::into_asc_order_iter()) as the
     /// underlying behaviour is **_exactly the same_.**
     fn into_in_order_iter(self) -> IntoIter<T>;
 
@@ -767,7 +767,7 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [IterativeBST::in_order_vec()] as the underlying
+    /// This function is analogous to [IterativeBST::in_order_vec()] as the underlying
     /// behaviour is **_exactly the same_.**
     ///
     /// # Example
@@ -823,7 +823,7 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [IterativeBST::asc_order_vec()] as the underlying
+    /// This function is analogous to [IterativeBST::asc_order_vec()] as the underlying
     /// behaviour is **_exactly the same_.**
     ///
     /// # Example
@@ -915,7 +915,7 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [IterativeBST::in_order_iter()] as the underlying
+    /// This function is analogous to [IterativeBST::in_order_iter()] as the underlying
     /// behaviour is **_exactly the same_.**
     ///
     /// # Example
@@ -974,7 +974,7 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [IterativeBST::asc_order_iter()] as the underlying
+    /// This function is analogous to [IterativeBST::asc_order_iter()] as the underlying
     /// behaviour is **_exactly the same_.**
     ///
     /// # Example
@@ -1060,7 +1060,7 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [IterativeBST::into_in_order_iter()] as the
+    /// This function is analogous to [IterativeBST::into_in_order_iter()] as the
     /// underlying behaviour is **_exactly the same_.**
     ///
     /// # Example
@@ -1123,7 +1123,7 @@ impl<T: Ord> BinarySearchTree<T> for IterativeBST<T> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [IterativeBST::asc_order_iter()] as the
+    /// This function is analogous to [IterativeBST::asc_order_iter()] as the
     /// underlying behaviour is **_exactly the same_.**
     ///
     /// # Example
@@ -1630,7 +1630,7 @@ impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [RecursiveBST::in_order_vec()] as the underlying
+    /// This function is analogous to [RecursiveBST::in_order_vec()] as the underlying
     /// behaviour is **_exactly the same_.**
     ///
     /// # Example
@@ -1690,7 +1690,7 @@ impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [RecursiveBST::asc_order_vec()] as the underlying
+    /// This function is analogous to [RecursiveBST::asc_order_vec()] as the underlying
     /// behaviour is **_exactly the same_.**
     ///
     /// # Example
@@ -1788,7 +1788,7 @@ impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [RecursiveBST::in_order_iter()] as the underlying
+    /// This function is analogous to [RecursiveBST::in_order_iter()] as the underlying
     /// behaviour is **_exactly the same_.**
     ///
     /// # Example
@@ -1851,7 +1851,7 @@ impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [RecursiveBST::asc_order_iter()] as the underlying
+    /// This function is analogous to [RecursiveBST::asc_order_iter()] as the underlying
     /// behaviour is **_exactly the same_.**
     ///
     /// # Example
@@ -1943,7 +1943,7 @@ impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [RecursiveBST::into_in_order_iter()] as the
+    /// This function is analogous to [RecursiveBST::into_in_order_iter()] as the
     /// underlying behaviour is **_exactly the same_.**
     ///
     /// # Example
@@ -2008,7 +2008,7 @@ impl<T: Ord> BinarySearchTree<T> for RecursiveBST<T> {
     ///
     /// # Important
     ///
-    /// This is function is analogous to [RecursiveBST::asc_order_iter()] as the
+    /// This function is analogous to [RecursiveBST::asc_order_iter()] as the
     /// underlying behaviour is **_exactly the same_.**
     ///
     /// # Example

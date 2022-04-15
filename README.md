@@ -9,8 +9,8 @@
 
 ## Table of Contents
 
-- [Personal Goals](#Personal-Goals)
 - [About](#About)
+- [Personal Goals](#Personal-Goals)
 - [Quick Start](#Quick-Start)
 - [License](#License)
 - [Contributing](#Contributing)
@@ -34,7 +34,7 @@ I have made this library with the personal goals of learning and solidifying con
 , `generics` and `lifetimes`. I cannot promise that the implementations are particularly efficient, or if they are, it
 was not at the forefront of my mind.
 
-That being said, there are some areas I would love to improve upon/include:
+That being said, there are some areas I would love to improve upon which include:
 
 - [ ] Write idiomatic code.
 - [ ] Effectively use **macro_rules!** to reduce large portions of repetitive code.

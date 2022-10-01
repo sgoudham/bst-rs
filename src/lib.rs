@@ -83,11 +83,45 @@
 //! assert_ne!(recursive_bst, RecursiveBST::new());
 //! ```
 
+use crate::node::{HeapNode, Node};
 use std::fmt::{Debug, Display, Formatter};
 use std::vec::IntoIter;
-use crate::node::{HeapNode, Node};
 
 mod node;
+
+/// Creates a [`IterativeBST`] containing the arguments.
+///
+/// # Important
+///
+/// If given no arguments this will be equivalent to calling
+/// `IterativeBST::new()`
+///
+/// # Example
+/// - Create a [`IterativeBST`] containing a given list of elements:
+///
+/// ```rust
+/// use bst_rs::{BinarySearchTree, IterativeBST, bst};
+///
+/// let t1 = bst![1, 2, 3];
+/// // Which is functionally equivalent to
+/// let t2 = IterativeBST::from_iter(vec![1,2,3]);
+/// // and produces the following tree
+/// //    2
+/// //   / \
+/// //  1   3
+/// assert_eq!(t1, t2);
+/// ```
+///
+/// [`IterativeBST`]: crate::IterativeBST
+#[macro_export]
+macro_rules! bst {
+    () => (
+        $crate::IterativeBST::new()
+    );
+    ($($x:expr),+ $(,)?) => (
+        $crate::IterativeBST::from_iter(vec![$($x),+].into_iter())
+    );
+}
 
 /// A trait containing all the common operations of Binary Search Trees.
 ///
@@ -209,12 +243,12 @@ pub trait BinarySearchTree<T: Ord> {
     ///
     /// Given a tree that looks like:
     ///
-    /// ```rust
-    ///  //         4
-    ///  //       /  \
-    ///  //      2    6
-    ///  //     / \  / \
-    ///  //    1  3 5   7
+    /// ```text
+    ///           4
+    ///         /  \
+    ///        2    6
+    ///       / \  / \
+    ///      1  3 5   7
     /// ```
     ///
     /// The height is: **2**
@@ -245,12 +279,12 @@ pub trait BinarySearchTree<T: Ord> {
     /// # Example
     ///
     /// Given a tree that looks like:
-    /// ```rust
-    ///  //         4
-    ///  //       /  \
-    ///  //      2    6
-    ///  //     / \  / \
-    ///  //    1  3 5   7
+    /// ```text
+    ///           4
+    ///         /  \
+    ///        2    6
+    ///       / \  / \
+    ///      1  3 5   7
     /// ```
     /// The pre_order_vec is: **[&4, &2, &1, &3, &6, &5, &7].**
     fn pre_order_vec(&self) -> Vec<&T>;
@@ -265,12 +299,12 @@ pub trait BinarySearchTree<T: Ord> {
     /// # Example
     ///
     /// Given a tree that looks like:
-    /// ```rust
-    ///  //         4
-    ///  //       /  \
-    ///  //      2    6
-    ///  //     / \  / \
-    ///  //    1  3 5   7
+    /// ```text
+    ///           4
+    ///         /  \
+    ///        2    6
+    ///       / \  / \
+    ///      1  3 5   7
     /// ```
     /// The in_order_vec is: **[&1, &2, &3, &4, &5, &6, &7].**
     fn in_order_vec(&self) -> Vec<&T>;
@@ -280,12 +314,12 @@ pub trait BinarySearchTree<T: Ord> {
     /// # Example
     ///
     /// Given a tree that looks like:
-    /// ```rust
-    ///  //         4
-    ///  //       /  \
-    ///  //      2    6
-    ///  //     / \  / \
-    ///  //    1  3 5   7
+    /// ```text
+    ///           4
+    ///         /  \
+    ///        2    6
+    ///       / \  / \
+    ///      1  3 5   7
     /// ```
     /// The post_order_vec is: **[&1, &3, &2, &5, &7, &6, &4].**
     fn post_order_vec(&self) -> Vec<&T>;
@@ -295,12 +329,12 @@ pub trait BinarySearchTree<T: Ord> {
     /// # Example
     ///
     /// Given a tree that looks like:
-    /// ```rust
-    ///  //         4
-    ///  //       /  \
-    ///  //      2    6
-    ///  //     / \  / \
-    ///  //    1  3 5   7
+    /// ```text
+    ///           4
+    ///         /  \
+    ///        2    6
+    ///       / \  / \
+    ///      1  3 5   7
     /// ```
     /// The post_order_vec is: **[&4, &2, &6, &1, &3, &5, &7].**
     fn level_order_vec(&self) -> Vec<&T>;

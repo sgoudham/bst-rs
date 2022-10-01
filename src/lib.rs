@@ -89,6 +89,16 @@ use crate::node::{HeapNode, Node};
 
 mod node;
 
+#[macro_export]
+macro_rules! bst {
+    () => (
+        $crate::IterativeBST::new()
+    );
+    ($($x:expr),+ $(,)?) => (
+        $crate::IterativeBST::from_iter(vec![$($x),+].into_iter())
+    );
+}
+
 /// A trait containing all the common operations of Binary Search Trees.
 ///
 /// # Examples
